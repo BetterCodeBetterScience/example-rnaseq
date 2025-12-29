@@ -1,0 +1,4 @@
+Config file config/config.yaml is extended by additional config specified via the command line.
+ValueError in file "/Users/poldrack/Dropbox/code/BetterCodeBetterScience/src/BetterCodeBetterScience/rnaseq/snakemake_workflow/Snakefile", line 53:
+datadir must be provided via --config datadir=/path/to/data
+  File "/Users/poldrack/Dropbox/code/BetterCodeBetterScience/src/BetterCodeBetterScience/rnaseq/snakemake_workflow/Snakefile", line 53, in <module>
