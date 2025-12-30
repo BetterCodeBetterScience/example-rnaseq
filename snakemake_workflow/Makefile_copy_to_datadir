@@ -1,0 +1,14 @@
+
+SOURCEDIR=/data1/BetterCodeBetterScience/example-rnaseq
+SNAKEDIR=$(SOURCEDIR)/snakemake_workflow
+
+# get ncores - 1 on mac or linux
+CORES := $(shell echo $$(( $$(nproc 2>/dev/null || sysctl -n hw.ncpu) - 1 )))
+
+run:
+	. $(SOURCEDIR)/.venv/bin/activate && \
+	snakemake --snakefile $(SNAKEDIR)/Snakefile -d ./ --cores $(CORES) --config datadir=./
+	
+lint:
+	. $(SOURCEDIR)/.venv/bin/activate && \
+	snakemake --lint --snakefile $(SNAKEDIR)/Snakefile -d ./ --cores $(CORES) --config datadir=./
