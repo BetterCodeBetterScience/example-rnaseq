@@ -46,10 +46,14 @@ import gseapy as gp
 from sklearn.svm import LinearSVR
 from sklearn.model_selection import ShuffleSplit
 from sklearn.metrics import r2_score, mean_absolute_error
+from dotenv import load_dotenv
 
-
-datadir = Path('/Users/poldrack/data_unsynced/BCBS/immune_aging/')
-
+load_dotenv()
+if os.getenv('DATADIR') is None:
+    raise ValueError('Please set DATADIR in your environment variables.')
+datadir = Path(os.getenv('DATADIR'))
+figure_dir = datadir / 'workflow/figures'
+figure_dir.mkdir(parents=True, exist_ok=True)   
 
 # %% [markdown]
 # ### Immune system gene expression and aging
@@ -67,9 +71,6 @@ datadir = Path('/Users/poldrack/data_unsynced/BCBS/immune_aging/')
 
 # %%
 
-datadir = Path('/Users/poldrack/data_unsynced/BCBS/immune_aging/')
-figure_dir = datadir / 'workflow/figures'
-figure_dir.mkdir(parents=True, exist_ok=True)
 
 # %%
 dataset_name = 'OneK1K'
