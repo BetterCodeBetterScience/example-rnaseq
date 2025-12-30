@@ -8,40 +8,40 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from clustering import (
+from example_rnaseq.clustering import (
     run_clustering_pipeline,
 )
-from data_filtering import (
+from example_rnaseq.data_filtering import (
     run_filtering_pipeline,
 )
-from data_loading import (
+from example_rnaseq.data_loading import (
     download_data,
     load_anndata,
     load_lazy_anndata,
     save_anndata,
 )
-from differential_expression import (
+from example_rnaseq.differential_expression import (
     run_differential_expression_pipeline,
 )
-from dimensionality_reduction import (
+from example_rnaseq.dimensionality_reduction import (
     run_dimensionality_reduction_pipeline,
 )
-from overrepresentation_analysis import (
+from example_rnaseq.overrepresentation_analysis import (
     run_overrepresentation_pipeline,
 )
-from pathway_analysis import (
+from example_rnaseq.pathway_analysis import (
     run_gsea_pipeline,
 )
-from predictive_modeling import (
+from example_rnaseq.predictive_modeling import (
     run_predictive_modeling_pipeline,
 )
-from preprocessing import (
+from example_rnaseq.preprocessing import (
     run_preprocessing_pipeline,
 )
-from pseudobulk import (
+from example_rnaseq.pseudobulk import (
     run_pseudobulk_pipeline,
 )
-from quality_control import (
+from example_rnaseq.quality_control import (
     run_qc_pipeline,
 )
 
@@ -310,5 +310,5 @@ if __name__ == "__main__":
     if datadir_env is None:
         raise ValueError("DATADIR environment variable not set")
 
-    datadir = Path(datadir_env)
+    datadir = Path(datadir_env) / 'immune_aging'
     results = run_full_workflow(datadir)
