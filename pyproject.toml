@@ -13,6 +13,7 @@ dependencies = [
     "python-dotenv>=1.2.1",
     "scanpy>=1.11.5",
     "scikit-image>=0.26.0",
+    "scikit-misc>=0.5.2",
     "snakemake>=9.14.5",
     "xarray>=2025.12.0",
 ]
