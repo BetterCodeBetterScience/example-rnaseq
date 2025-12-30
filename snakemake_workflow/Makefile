@@ -1,4 +1,4 @@
-include ../../../../.env
+include ../.env
 export
 
 # Generate rule dependency graph
@@ -7,7 +7,10 @@ rulegraph:
 
 # Run the full workflow
 run:
-	snakemake --cores 8 --sdm conda --config datadir=$(DATADIR)/immune_aging/wf_snakemake/
+	uv run snakemake --cores 8 --config datadir=$(DATADIR)/immune_aging/wf_snakemake/
+
+run-conda:
+	uv run snakemake --cores 8 --sdm conda --config datadir=$(DATADIR)/immune_aging/wf_snakemake/
 # Generate HTML report (run after workflow completes)
 report:
 	snakemake --report $(DATADIR)/immune_aging/wf_snakemake/report.html --config datadir=$(DATADIR)/immune_aging/
@@ -18,7 +21,7 @@ report-zip:
 
 # Dry run - show what would be executed
 dry-run:
-	snakemake -n --config datadir=$(DATADIR)/immune_aging/wf_snakemake/
+	uv run snakemake -n --cores 1 --config datadir=$(DATADIR)/immune_aging/wf_snakemake/
 
 # Clean all outputs
 clean:

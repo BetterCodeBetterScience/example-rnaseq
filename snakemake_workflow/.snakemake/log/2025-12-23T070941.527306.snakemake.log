@@ -1,3 +1,0 @@
-Config file config/config.yaml is extended by additional config specified via the command line.
-WorkflowError in file "/Users/poldrack/Dropbox/code/BetterCodeBetterScience/src/BetterCodeBetterScience/rnaseq/snakemake_workflow/rules/preprocessing.smk", line 48:
-Workflow requires a total number of cores to be defined (e.g. because a rule defines its number of threads as a fraction of a total number of cores). Please set it with --cores N with N being the desired number of cores. Consider to use this in combination with --max-threads to avoid jobs with too many threads for your setup. Also make sure to perform a dryrun first.
