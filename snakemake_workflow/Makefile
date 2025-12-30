@@ -1,13 +1,18 @@
 include ../.env
 export
 
+OUTPUT_DIR := $(DATADIR)/immune_aging/wf_snakemake/
+
+# get ncores - 1 on mac or linux
+CORES := $(shell echo $$(( $$(nproc 2>/dev/null || sysctl -n hw.ncpu) - 1 )))
+
 # Generate rule dependency graph
 rulegraph:
-	snakemake --rulegraph --config datadir=$(DATADIR)/immune_aging/wf_snakemake/ --cores 2 | dot -Tpng > rulegraph.png
+	snakemake --rulegraph --config datadir=$(OUTPUT_DIR) --cores 2 | dot -Tpng > rulegraph.png
 
 # Run the full workflow
 run:
-	uv run snakemake --cores 8 --config datadir=$(DATADIR)/immune_aging/wf_snakemake/
+	uv run snakemake -d $(OUTPUT_DIR) --cores $(CORES) --config datadir=$(OUTPUT_DIR)
 
 run-conda:
 	uv run snakemake --cores 8 --sdm conda --config datadir=$(DATADIR)/immune_aging/wf_snakemake/

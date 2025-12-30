@@ -29,7 +29,7 @@ checkpoint pseudobulk:
         # Pseudobulk figure
         fig_pseudobulk=report(
             FIGURE_DIR / "pseudobulk_violin.png",
-            caption="../report/pseudobulk.rst",
+            caption=f"{workflow.basedir}/report/pseudobulk.rst",
             category="Step 7: Pseudobulking",
         ),
     params:
@@ -44,4 +44,4 @@ checkpoint pseudobulk:
     conda:
         "bettercode"
     script:
-        "../scripts/pseudobulk.py"
+        f"{workflow.basedir}/scripts/pseudobulk.py"

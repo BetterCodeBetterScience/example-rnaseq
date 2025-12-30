@@ -41,11 +41,11 @@ min_version("8.0")
 
 
 # Load configuration
-configfile: "config/config.yaml"
+configfile: f"{workflow.basedir}/config/config.yaml"
 
 
 # Global report description
-report: "report/workflow.rst"
+report: f"{workflow.basedir}/report/workflow.rst"
 
 
 # Validate required config
@@ -65,10 +65,10 @@ LOG_DIR = DATADIR / "logs"
 
 
 # Include modular rule files
-include: "rules/common.smk"
-include: "rules/preprocessing.smk"
-include: "rules/pseudobulk.smk"
-include: "rules/per_cell_type.smk"
+include: f"{workflow.basedir}/rules/common.smk"
+include: f"{workflow.basedir}/rules/preprocessing.smk"
+include: f"{workflow.basedir}/rules/pseudobulk.smk"
+include: f"{workflow.basedir}/rules/per_cell_type.smk"
 
 
 # Default target: all analyses complete
@@ -91,7 +91,7 @@ rule aggregate_results:
     conda:
         "bettercode"
     script:
-        "scripts/aggregate_results.py"
+        f"{workflow.basedir}/scripts/aggregate_results.py"
 
 
 # Preprocessing-only target (stops at step 6)

@@ -19,9 +19,9 @@ rule download_data:
     log:
         LOG_DIR / "step01_download.log",
     conda:
-        "bettercode"
+        "bettercode",
     script:
-        "../scripts/download.py"
+        f"{workflow.basedir}/scripts/download.py"
 
 
 # Step 2: Data Filtering
@@ -32,7 +32,7 @@ rule filter_data:
         checkpoint=CHECKPOINT_DIR / bids_checkpoint_name(DATASET, 2, "filtered"),
         fig_donor_counts=report(
             FIGURE_DIR / "donor_cell_counts_distribution.png",
-            caption="../report/filtering.rst",
+            caption=f"{workflow.basedir}/report/filtering.rst",
             category="Step 2: Filtering",
         ),
     params:
@@ -43,9 +43,9 @@ rule filter_data:
     log:
         LOG_DIR / "step02_filtering.log",
     conda:
-        "bettercode"
+        "bettercode",
     script:
-        "../scripts/filter.py"
+        f"{workflow.basedir}/scripts/filter.py"
 
 
 # Step 3: Quality Control
@@ -56,22 +56,22 @@ rule quality_control:
         checkpoint=CHECKPOINT_DIR / bids_checkpoint_name(DATASET, 3, "qc"),
         fig_violin=report(
             FIGURE_DIR / "qc_violin_plots.png",
-            caption="../report/qc_violin.rst",
+            caption=f"{workflow.basedir}/report/qc_violin.rst",
             category="Step 3: Quality Control",
         ),
         fig_scatter=report(
             FIGURE_DIR / "qc_scatter_doublets.png",
-            caption="../report/qc_scatter.rst",
+            caption=f"{workflow.basedir}/report/qc_scatter.rst",
             category="Step 3: Quality Control",
         ),
         fig_hemoglobin=report(
             FIGURE_DIR / "hemoglobin_distribution.png",
-            caption="../report/hemoglobin.rst",
+            caption=f"{workflow.basedir}/report/hemoglobin.rst",
             category="Step 3: Quality Control",
         ),
         fig_doublet_umap=report(
             FIGURE_DIR / "doublet_detection_umap.png",
-            caption="../report/doublet_umap.rst",
+            caption=f"{workflow.basedir}/report/doublet_umap.rst",
             category="Step 3: Quality Control",
         ),
     threads: workflow.cores
@@ -86,10 +86,9 @@ rule quality_control:
     log:
         LOG_DIR / "step03_qc.log",
     conda:
-        "bettercode"
+        "bettercode",
     script:
-        "../scripts/qc.py"
-
+        f"{workflow.basedir}/scripts/qc.py"
 
 # Step 4: Preprocessing
 rule preprocess:
@@ -105,9 +104,9 @@ rule preprocess:
     log:
         LOG_DIR / "step04_preprocessing.log",
     conda:
-        "bettercode"
+        "bettercode",
     script:
-        "../scripts/preprocess.py"
+        f"{workflow.basedir}/scripts/preprocess.py"
 
 
 # Step 5: Dimensionality Reduction
@@ -118,12 +117,12 @@ rule dimensionality_reduction:
         checkpoint=CHECKPOINT_DIR / bids_checkpoint_name(DATASET, 5, "dimreduced"),
         fig_pca=report(
             FIGURE_DIR / "pca_cell_type.png",
-            caption="../report/pca.rst",
+            caption=f"{workflow.basedir}/report/pca.rst",
             category="Step 5: Dimensionality Reduction",
         ),
         fig_umap=report(
             FIGURE_DIR / "umap_total_counts.png",
-            caption="../report/umap.rst",
+            caption=f"{workflow.basedir}/report/umap.rst",
             category="Step 5: Dimensionality Reduction",
         ),
     threads: workflow.cores
@@ -135,9 +134,9 @@ rule dimensionality_reduction:
     log:
         LOG_DIR / "step05_dimred.log",
     conda:
-        "bettercode"
+        "bettercode",
     script:
-        "../scripts/dimred.py"
+        f"{workflow.basedir}/scripts/dimred.py"
 
 
 # Step 6: Clustering
@@ -148,7 +147,7 @@ rule clustering:
         checkpoint=CHECKPOINT_DIR / bids_checkpoint_name(DATASET, 6, "clustered"),
         fig_clustering=report(
             FIGURE_DIR / "umap_cell_type_leiden.png",
-            caption="../report/clustering.rst",
+            caption=f"{workflow.basedir}/report/clustering.rst",
             category="Step 6: Clustering",
         ),
     params:
@@ -157,6 +156,6 @@ rule clustering:
     log:
         LOG_DIR / "step06_clustering.log",
     conda:
-        "bettercode"
+        "bettercode",
     script:
-        "../scripts/cluster.py"
+        f"{workflow.basedir}/scripts/cluster.py"

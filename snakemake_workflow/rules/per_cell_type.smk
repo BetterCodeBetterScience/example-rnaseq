@@ -32,7 +32,7 @@ rule differential_expression:
     conda:
         "bettercode"
     script:
-        "../scripts/differential_expression.py"
+        "{workflow.basedir}/scripts/differential_expression.py"
 
 
 # Step 9: Pathway Analysis (GSEA) (per cell type)
@@ -59,7 +59,7 @@ rule pathway_analysis:
     conda:
         "bettercode"
     script:
-        "../scripts/gsea.py"
+        "{workflow.basedir}/scripts/gsea.py"
 
 
 # Step 10: Overrepresentation Analysis (Enrichr) (per cell type)
@@ -88,7 +88,7 @@ rule overrepresentation:
     conda:
         "bettercode"
     script:
-        "../scripts/enrichr.py"
+        "{workflow.basedir}/scripts/enrichr.py"
 
 
 # Step 11: Predictive Modeling (per cell type)
@@ -119,4 +119,4 @@ rule predictive_modeling:
     conda:
         "bettercode"
     script:
-        "../scripts/prediction.py"
+        "{workflow.basedir}/scripts/prediction.py"
