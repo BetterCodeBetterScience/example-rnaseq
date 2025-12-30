@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pandas as pd
 
-from bettercode.rnaseq.modular_workflow.pathway_analysis import (
+from example_rnaseq.pathway_analysis import (
     run_gsea_pipeline,
 )
-from bettercode.rnaseq.stateless_workflow.checkpoint import save_checkpoint
+from example_rnaseq.checkpoint import save_checkpoint
 
 
 def main():

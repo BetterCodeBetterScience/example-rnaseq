@@ -12,7 +12,6 @@ import pandas as pd
 import scanpy as sc
 from sklearn.preprocessing import OneHotEncoder
 
-
 def create_pseudobulk(
     adata: ad.AnnData,
     group_col: str,
@@ -59,6 +58,12 @@ def create_pseudobulk(
 
     # Aggregate by summing
     pseudobulk_X = membership_matrix.T @ X_source
+    
+    # Convert to integers (since these are summed raw counts)
+    # Round first to handle any floating point precision issues
+    if hasattr(pseudobulk_X, 'toarray'):
+        pseudobulk_X = pseudobulk_X.toarray()
+    pseudobulk_X = np.round(pseudobulk_X).astype(int)
 
     # Create obs metadata for the new object
     unique_ids = enc.categories_[0]

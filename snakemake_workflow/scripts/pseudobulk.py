@@ -8,10 +8,10 @@ all valid cell types, which enables downstream dynamic rules.
 import json
 from pathlib import Path
 
-from bettercode.rnaseq.modular_workflow.pseudobulk import (
+from example_rnaseq.pseudobulk import (
     run_pseudobulk_pipeline,
 )
-from bettercode.rnaseq.stateless_workflow.checkpoint import (
+from example_rnaseq.checkpoint import (
     load_checkpoint,
     save_checkpoint,
 )

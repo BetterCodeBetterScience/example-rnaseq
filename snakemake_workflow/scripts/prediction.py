@@ -5,10 +5,10 @@ from pathlib import Path
 
 import pandas as pd
 
-from bettercode.rnaseq.modular_workflow.predictive_modeling import (
+from example_rnaseq.predictive_modeling import (
     run_predictive_modeling_pipeline,
 )
-from bettercode.rnaseq.stateless_workflow.checkpoint import (
+from example_rnaseq.checkpoint import (
     load_checkpoint,
     save_checkpoint,
 )

@@ -1,5 +1,5 @@
 [project]
-name = "example-rnaseq"
+name = "example_rnaseq"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -9,6 +9,7 @@ dependencies = [
     "dask>=2025.12.0",
     "gseapy>=1.1.11",
     "h5py>=3.15.1",
+    "ipython>=9.8.0",
     "pydeseq2>=0.5.3",
     "python-dotenv>=1.2.1",
     "scanpy>=1.11.5",
@@ -17,3 +18,8 @@ dependencies = [
     "snakemake>=9.14.5",
     "xarray>=2025.12.0",
 ]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+

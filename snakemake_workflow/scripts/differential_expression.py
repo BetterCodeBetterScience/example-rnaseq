@@ -3,10 +3,10 @@
 import json
 from pathlib import Path
 
-from bettercode.rnaseq.modular_workflow.differential_expression import (
+from example_rnaseq.differential_expression import (
     run_differential_expression_pipeline,
 )
-from bettercode.rnaseq.stateless_workflow.checkpoint import (
+from example_rnaseq.checkpoint import (
     load_checkpoint,
     save_checkpoint,
 )

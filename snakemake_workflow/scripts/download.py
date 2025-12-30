@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from bettercode.rnaseq.modular_workflow.data_loading import download_data
+from example_rnaseq.data_loading import download_data
 
 
 def main():

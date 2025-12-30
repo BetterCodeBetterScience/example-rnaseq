@@ -2,10 +2,10 @@
 
 from pathlib import Path
 
-from bettercode.rnaseq.modular_workflow.clustering import (
+from example_rnaseq.clustering import (
     run_clustering_pipeline,
 )
-from bettercode.rnaseq.stateless_workflow.checkpoint import (
+from example_rnaseq.checkpoint import (
     load_checkpoint,
     save_checkpoint,
 )

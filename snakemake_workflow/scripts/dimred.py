@@ -8,10 +8,10 @@ from pathlib import Path
 os.environ["NUMBA_NUM_THREADS"] = str(snakemake.threads)
 os.environ["OMP_NUM_THREADS"] = str(snakemake.threads)
 
-from bettercode.rnaseq.modular_workflow.dimensionality_reduction import (
+from example_rnaseq.dimensionality_reduction import (
     run_dimensionality_reduction_pipeline,
 )
-from bettercode.rnaseq.stateless_workflow.checkpoint import (
+from example_rnaseq.checkpoint import (
     load_checkpoint,
     save_checkpoint,
 )

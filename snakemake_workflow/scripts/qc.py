@@ -2,10 +2,10 @@
 
 from pathlib import Path
 
-from bettercode.rnaseq.modular_workflow.quality_control import (
+from example_rnaseq.quality_control import (
     run_qc_pipeline,
 )
-from bettercode.rnaseq.stateless_workflow.checkpoint import (
+from example_rnaseq.checkpoint import (
     load_checkpoint,
     save_checkpoint,
 )

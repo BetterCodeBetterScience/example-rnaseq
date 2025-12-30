@@ -2,13 +2,13 @@
 
 from pathlib import Path
 
-from bettercode.rnaseq.modular_workflow.data_filtering import (
+from example_rnaseq.data_filtering import (
     run_filtering_pipeline,
 )
-from bettercode.rnaseq.modular_workflow.data_loading import (
+from example_rnaseq.data_loading import (
     load_lazy_anndata,
 )
-from bettercode.rnaseq.stateless_workflow.checkpoint import save_checkpoint
+from example_rnaseq.checkpoint import save_checkpoint
 
 
 def main():

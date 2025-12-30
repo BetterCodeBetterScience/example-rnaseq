@@ -231,7 +231,7 @@ def run_with_checkpoint(
     from_cache = False
     error_message = None
     save_succeeded = False
-
+    print(*args, **kwargs)
     try:
         if checkpoint_file.exists() and not force:
             print(f"[{step_name}] Loading from checkpoint: {checkpoint_file.name}")
@@ -240,6 +240,7 @@ def run_with_checkpoint(
             save_succeeded = True  # Loading counts as success
         else:
             print(f"[{step_name}] Executing...")
+
             result = func(*args, **kwargs)
 
             if not skip_save:

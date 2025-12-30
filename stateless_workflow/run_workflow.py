@@ -5,45 +5,49 @@ to enable stateless execution and resumption from any step.
 """
 
 import os
+import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
 
-from bettercode.rnaseq.modular_workflow.clustering import (
+# Add parent directory to path to import from modular_workflow
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from modular_workflow.clustering import (
     run_clustering_pipeline,
 )
-from bettercode.rnaseq.modular_workflow.data_filtering import (
+from modular_workflow.data_filtering import (
     run_filtering_pipeline,
 )
-from bettercode.rnaseq.modular_workflow.data_loading import (
+from modular_workflow.data_loading import (
     download_data,
     load_lazy_anndata,
 )
-from bettercode.rnaseq.modular_workflow.differential_expression import (
+from modular_workflow.differential_expression import (
     run_differential_expression_pipeline,
 )
-from bettercode.rnaseq.modular_workflow.dimensionality_reduction import (
+from modular_workflow.dimensionality_reduction import (
     run_dimensionality_reduction_pipeline,
 )
-from bettercode.rnaseq.modular_workflow.overrepresentation_analysis import (
+from modular_workflow.overrepresentation_analysis import (
     run_overrepresentation_pipeline,
 )
-from bettercode.rnaseq.modular_workflow.pathway_analysis import (
+from modular_workflow.pathway_analysis import (
     run_gsea_pipeline,
 )
-from bettercode.rnaseq.modular_workflow.predictive_modeling import (
+from modular_workflow.predictive_modeling import (
     run_predictive_modeling_pipeline,
 )
-from bettercode.rnaseq.modular_workflow.preprocessing import (
+from modular_workflow.preprocessing import (
     run_preprocessing_pipeline,
 )
-from bettercode.rnaseq.modular_workflow.pseudobulk import (
+from modular_workflow.pseudobulk import (
     run_pseudobulk_pipeline,
 )
-from bettercode.rnaseq.modular_workflow.quality_control import (
+from modular_workflow.quality_control import (
     run_qc_pipeline,
 )
-from bettercode.rnaseq.stateless_workflow.checkpoint import (
+from checkpoint import (
     bids_checkpoint_name,
     clear_checkpoints_from_step,
     load_checkpoint,
@@ -51,7 +55,7 @@ from bettercode.rnaseq.stateless_workflow.checkpoint import (
     run_with_checkpoint,
     run_with_checkpoint_multi,
 )
-from bettercode.rnaseq.stateless_workflow.execution_log import (
+from execution_log import (
     ExecutionLog,
     create_execution_log,
     serialize_parameters,
