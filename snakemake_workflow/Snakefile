@@ -43,26 +43,16 @@ min_version("8.0")
 # Load configuration
 configfile: f"{workflow.basedir}/config/config.yaml"
 
+DATASET = config["dataset_name"]
 
 # Global report description
 report: f"{workflow.basedir}/report/workflow.rst"
 
-
-# Validate required config
-if config.get("datadir") is None:
-    raise ValueError(
-        "datadir must be provided via --config datadir=/path/to/data"
-    )
-
-DATADIR = Path(config["datadir"])
-DATASET = config["dataset_name"]
-
 # Derived paths
-CHECKPOINT_DIR = DATADIR / "checkpoints"
-RESULTS_DIR = DATADIR / "results"
-FIGURE_DIR = DATADIR / "figures"
-LOG_DIR = DATADIR / "logs"
-
+CHECKPOINT_DIR = Path("checkpoints")
+RESULTS_DIR =  Path("results")
+FIGURE_DIR = Path("figures")
+LOG_DIR = Path("logs")
 
 # Include modular rule files
 include: f"{workflow.basedir}/rules/common.smk"
