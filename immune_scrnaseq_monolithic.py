@@ -51,7 +51,9 @@ from dotenv import load_dotenv
 load_dotenv()
 if os.getenv('DATADIR') is None:
     raise ValueError('Please set DATADIR in your environment variables.')
-datadir = Path(os.getenv('DATADIR'))
+datadir = Path(os.getenv('DATADIR')) / 'immune_aging'
+assert datadir.exists(), f"Data directory {datadir} does not exist."
+
 figure_dir = datadir / 'workflow/figures'
 figure_dir.mkdir(parents=True, exist_ok=True)   
 
