@@ -46,7 +46,7 @@ def run_harmony_integration(
             "Harmony not installed. Proceeding with standard PCA "
             "(Warning: Batch effects may persist)."
         )
-        print("To install: pip install harmony-pytorch")
+        print("To install: pip install harmonypy")
         use_rep = basis
 
     return adata, use_rep
