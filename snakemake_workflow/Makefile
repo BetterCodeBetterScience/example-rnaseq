@@ -12,7 +12,7 @@ rulegraph:
 
 # Run the full workflow
 run:
-	uv run snakemake -d $(OUTPUT_DIR) --cores $(CORES) --config datadir=$(OUTPUT_DIR)
+	uv run snakemake -d $(OUTPUT_DIR) --snakefile ./Snakefile --cores $(CORES) --config datadir=$(OUTPUT_DIR)
 
 run-conda:
 	uv run snakemake --cores 8 --sdm conda --config datadir=$(DATADIR)/immune_aging/wf_snakemake/
