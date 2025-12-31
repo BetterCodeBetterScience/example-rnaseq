@@ -10,44 +10,41 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# Add parent directory to path to import from modular_workflow
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from modular_workflow.clustering import (
+from example_rnaseq.clustering import (
     run_clustering_pipeline,
 )
-from modular_workflow.data_filtering import (
+from example_rnaseq.data_filtering import (
     run_filtering_pipeline,
 )
-from modular_workflow.data_loading import (
+from example_rnaseq.data_loading import (
     download_data,
     load_lazy_anndata,
 )
-from modular_workflow.differential_expression import (
+from example_rnaseq.differential_expression import (
     run_differential_expression_pipeline,
 )
-from modular_workflow.dimensionality_reduction import (
+from example_rnaseq.dimensionality_reduction import (
     run_dimensionality_reduction_pipeline,
 )
-from modular_workflow.overrepresentation_analysis import (
+from example_rnaseq.overrepresentation_analysis import (
     run_overrepresentation_pipeline,
 )
-from modular_workflow.pathway_analysis import (
+from example_rnaseq.pathway_analysis import (
     run_gsea_pipeline,
 )
-from modular_workflow.predictive_modeling import (
+from example_rnaseq.predictive_modeling import (
     run_predictive_modeling_pipeline,
 )
-from modular_workflow.preprocessing import (
+from example_rnaseq.preprocessing import (
     run_preprocessing_pipeline,
 )
-from modular_workflow.pseudobulk import (
+from example_rnaseq.pseudobulk import (
     run_pseudobulk_pipeline,
 )
-from modular_workflow.quality_control import (
+from example_rnaseq.quality_control import (
     run_qc_pipeline,
 )
-from checkpoint import (
+from example_rnaseq.checkpoint import (
     bids_checkpoint_name,
     clear_checkpoints_from_step,
     load_checkpoint,
@@ -55,7 +52,7 @@ from checkpoint import (
     run_with_checkpoint,
     run_with_checkpoint_multi,
 )
-from execution_log import (
+from example_rnaseq.execution_log import (
     ExecutionLog,
     create_execution_log,
     serialize_parameters,
@@ -156,13 +153,13 @@ def run_stateless_workflow(
     print(f"Checkpointing enabled for steps: {sorted(checkpoint_steps)}")
 
     # Setup directories
-    figure_dir = datadir / "workflow/figures"
+    figure_dir = datadir / "workflow_stateless/figures"
     figure_dir.mkdir(parents=True, exist_ok=True)
 
-    checkpoint_dir = datadir / "workflow/checkpoints"
+    checkpoint_dir = datadir / "workflow_stateless/checkpoints"
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
-    log_dir = datadir / "workflow/logs"
+    log_dir = datadir / "workflow_stateless/logs"
     log_dir.mkdir(parents=True, exist_ok=True)
 
     # Clear downstream checkpoints if forcing re-run
@@ -580,7 +577,7 @@ def list_checkpoints(datadir: Path) -> list[tuple[str, Path]]:
     list[tuple[str, Path]]
         List of (step_name, file_path) tuples, sorted by step number
     """
-    checkpoint_dir = datadir / "workflow/checkpoints"
+    checkpoint_dir = datadir / "workflow_stateless/checkpoints"
     if not checkpoint_dir.exists():
         return []
 
@@ -646,7 +643,7 @@ def list_execution_logs(datadir: Path) -> list[Path]:
     list[Path]
         List of log file paths, sorted by date (newest first)
     """
-    log_dir = datadir / "workflow/logs"
+    log_dir = datadir / "workflow_stateless/logs"
     if not log_dir.exists():
         return []
 
@@ -668,7 +665,7 @@ def load_execution_log(log_file: Path) -> ExecutionLog:
     """
     import json
 
-    from bettercode.rnaseq.stateless_workflow.execution_log import (
+    from example_rnaseq.execution_log import (
         StepRecord,
     )
 
