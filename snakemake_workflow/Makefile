@@ -18,7 +18,8 @@ run-conda:
 	uv run snakemake --cores 8 --sdm conda --config datadir=$(DATADIR)/immune_aging/wf_snakemake/
 # Generate HTML report (run after workflow completes)
 report:
-	snakemake --report $(DATADIR)/immune_aging/wf_snakemake/report.html --config datadir=$(DATADIR)/immune_aging/
+	snakemake -c 1 --report $(OUTPUT_DIR)/report.html -d $(OUTPUT_DIR)
+
 
 # Generate ZIP report (for larger reports with many figures)
 report-zip:
