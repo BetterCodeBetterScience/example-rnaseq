@@ -6,6 +6,7 @@ Functions for running DESeq2-based differential expression analysis.
 import anndata as ad
 import numpy as np
 import pandas as pd
+import scipy.sparse as sp
 from pydeseq2.dds import DeseqDataSet
 from pydeseq2.ds import DeseqStats
 from sklearn.preprocessing import StandardScaler
@@ -55,8 +56,14 @@ def prepare_deseq_inputs(
     else:
         columns = pb_adata.var_names.tolist()
 
+    # Convert sparse matrix to array if needed
+    if sp.issparse(pb_adata.X):
+        counts_matrix = pb_adata.X.toarray()
+    else:
+        counts_matrix = pb_adata.X
+
     counts_df = pd.DataFrame(
-        pb_adata.X.toarray(),
+        counts_matrix,
         index=pb_adata.obs_names,
         columns=columns,
     )
