@@ -45,6 +45,9 @@ configfile: f"{workflow.basedir}/config/config.yaml"
 
 DATASET = config["dataset_name"]
 
+# Raw data file: use config value if provided, otherwise use default naming convention
+RAW_DATA_FILE = config.get("raw_data_file") or f"dataset-{DATASET}_subset-immune_raw.h5ad"
+
 # Global report description
 report: f"{workflow.basedir}/report/workflow.rst"
 
