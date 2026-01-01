@@ -16,6 +16,7 @@ dependencies = [
     "ipython>=9.8.0",
     "pyarrow>=22.0.0",
     "pydeseq2>=0.5.3",
+    "pytest>=9.0.2",
     "python-dotenv>=1.2.1",
     "scanpy>=1.11.5",
     "scikit-image>=0.26.0",
