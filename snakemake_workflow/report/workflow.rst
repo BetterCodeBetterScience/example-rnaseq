@@ -26,4 +26,3 @@ Configuration
 
 Dataset: ``{{ snakemake.config["dataset_name"] }}``
 
-Data directory: ``{{ snakemake.config["datadir"] }}``
