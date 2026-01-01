@@ -210,104 +210,6 @@ if logs:
 
 ---
 
-## 4. Prefect Workflow
-
-The Prefect workflow uses the Prefect orchestration framework and analyzes all cell types in parallel.
-
-**Location:** `prefect_workflow/run_workflow.py`
-
-### Running the Workflow
-
-```bash
-# Basic run with default config
-python -m bettercode.rnaseq.prefect_workflow.run_workflow --datadir /path/to/data/immune_aging
-
-# With custom config file
-python -m bettercode.rnaseq.prefect_workflow.run_workflow \
-    --datadir /path/to/data/immune_aging \
-    --config /path/to/custom_config.yaml
-
-# Force re-run from step 8
-python -m bettercode.rnaseq.prefect_workflow.run_workflow \
-    --datadir /path/to/data/immune_aging \
-    --force-from 8
-```
-
-### List Available Cell Types
-
-```bash
-python -m bettercode.rnaseq.prefect_workflow.run_workflow \
-    --datadir /path/to/data/immune_aging \
-    --list-cell-types
-```
-
-### Analyze a Single Cell Type
-
-```bash
-python -m bettercode.rnaseq.prefect_workflow.run_workflow \
-    --datadir /path/to/data/immune_aging \
-    --cell-type "central memory CD4-positive, alpha-beta T cell"
-```
-
-### CLI Options
-
-| Option | Description |
-|--------|-------------|
-| `--datadir` | Base directory for data files |
-| `--config` | Path to custom config YAML file |
-| `--force-from` | Force re-run from this step onwards (1-11) |
-| `--cell-type` | Analyze a single cell type only |
-| `--list-cell-types` | List available cell types and exit |
-
-### Configuration File
-
-The default configuration is in `prefect_workflow/config/config.yaml`. You can create a custom config to override any parameters:
-
-```yaml
-# Custom config example
-dataset_name: "MyDataset"
-
-filtering:
-  cutoff_percentile: 2.0
-  min_cells_per_celltype: 20
-
-qc:
-  min_genes: 300
-  max_genes: 5000
-
-differential_expression:
-  n_cpus: 16
-
-min_samples_per_cell_type: 20
-```
-
-### Output Location
-
-```
-{datadir}/wf_prefect/
-├── checkpoints/           # BIDS-named checkpoint files
-├── figures/               # Visualization outputs
-├── results/per_cell_type/ # Per-cell-type analysis results
-│   └── {cell_type}/
-│       ├── stat_res.pkl
-│       ├── de_results.parquet
-│       ├── counts.parquet
-│       ├── gsea_results.pkl
-│       ├── enrichr_up.pkl
-│       ├── enrichr_down.pkl
-│       └── prediction_results.pkl
-└── logs/                  # Execution logs
-```
-
-### Notes
-
-- Analyzes ALL cell types (not just one)
-- Configuration via YAML file
-- Results saved per cell type
-- Uses Prefect for orchestration and logging
-
----
-
 ## 5. Snakemake Workflow
 
 The Snakemake workflow uses the Snakemake workflow management system with dynamic rule generation for per-cell-type analysis.
@@ -415,7 +317,7 @@ snakemake --dag --config datadir=/path/to/data/immune_aging | dot -Tpng > dag.pn
 The dataset is large (~1.2M cells). If you encounter memory issues:
 
 1. Use a machine with at least 64GB RAM
-2. For Prefect/Snakemake workflows, reduce `--cores` to limit parallel jobs
+2. For nakemake workflows, reduce `--cores` to limit parallel jobs
 3. For the stateless workflow, ensure checkpoints are saved to reduce memory pressure
 
 ### Missing Dependencies
