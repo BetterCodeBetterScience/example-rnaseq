@@ -2,6 +2,7 @@ include ../.env
 export
 
 OUTPUT_DIR := $(DATADIR)/immune_aging/wf_snakemake/
+TEST_DIR := $(DATADIR)/test/wf_snakemake/
 
 # get ncores - 1 on mac or linux
 CORES := $(shell echo $$(( $$(nproc 2>/dev/null || sysctl -n hw.ncpu) - 1 )))
@@ -13,6 +14,9 @@ rulegraph:
 # Run the full workflow
 run:
 	uv run snakemake -d $(OUTPUT_DIR) --snakefile ./Snakefile --cores $(CORES) --config datadir=$(OUTPUT_DIR)
+
+run-test:
+	uv run snakemake -d $(TEST_DIR) --snakefile ./Snakefile --cores $(CORES) --config raw_data_file=/data1/bcbs_data/test/dataset-test_raw.h5ad --verbose --printshellcmds 2>&1 | tee snakemake.log
 
 run-conda:
 	uv run snakemake --cores 8 --sdm conda --config datadir=$(DATADIR)/immune_aging/wf_snakemake/
