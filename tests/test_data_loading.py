@@ -60,7 +60,7 @@ def test_load_anndata_nonexistent_file():
 @pytest.mark.integration
 def test_load_test_dataset(test_data_dir):
     """Test loading the actual test dataset."""
-    test_file = test_data_dir / "testdata.h5ad"
+    test_file = test_data_dir / "dataset-test_raw.h5ad"
     if not test_file.exists():
         pytest.skip("Test data file not found")
 
