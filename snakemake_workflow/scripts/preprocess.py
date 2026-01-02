@@ -48,7 +48,14 @@ def main():
     log_and_flush(f"Loading data from: {input_file}")
     adata = load_checkpoint(input_file)
     log_and_flush(f"Loaded dataset: {adata.n_obs} cells x {adata.n_vars} genes")
-    log_and_flush(f"Memory usage: {adata.X.nbytes / 1e9:.2f} GB for X matrix")
+
+    # Calculate memory usage (handle both dense and sparse matrices)
+    if hasattr(adata.X, "nbytes"):
+        mem_gb = adata.X.nbytes / 1e9
+    else:
+        # Sparse matrix: sum data, indices, and indptr arrays
+        mem_gb = (adata.X.data.nbytes + adata.X.indices.nbytes + adata.X.indptr.nbytes) / 1e9
+    log_and_flush(f"Memory usage: {mem_gb:.2f} GB for X matrix")
 
     # Step 1: Normalize
     log_and_flush("Step 1/5: Normalizing counts...")
