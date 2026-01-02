@@ -1,7 +1,6 @@
 """Main Snakemake workflow for scRNA-seq immune aging analysis.
 
-This workflow is functionally equivalent to the Prefect and stateless workflows.
-It processes scRNA-seq data through 11 steps:
+This workflow processes scRNA-seq data through 11 steps:
 
 Global Steps (1-7):
 1. Data Download

@@ -1,18 +1,20 @@
 ## Example RNA-seq workflow
 
-This is a set of implementations of an analysis workflow for single-cell RNA-seq data analysis. These are meant to exemplify different ways of building a workflow.
+A single-cell RNA-seq analysis workflow implemented using Snakemake. The workflow processes scRNA-seq data through quality control, normalization, dimensionality reduction, and per-cell-type differential expression analysis.
 
-The main goal of this development project is to develop a testing framework for this workflow.  This will involve two main steps:
+## Project Structure
 
-- develop unit tests for the functions defined within src/example_rnaseq
-- develop integration tests for the snakemake workflow defined in snakemake_workflow
+- `src/example_rnaseq/` - Core analysis modules
+- `snakemake_workflow/` - Snakemake workflow definition
+- `tests/` - Test suite with unit and integration tests
 
-Some of these tests can be performed using automatically generated data. However, the integration tests will require a test dataset. this should be based on the actual data that can be found at /Users/poldrack/data_unsynced/BCBS/immune_aging/dataset-OneK1K_subset-immune_raw.h5ad.  To minimize the size of this dataset, we should first select a subset of 30 donors from the dataset.  we should look for donors that vary in the number of cells, with some having high numbers and some having low numbers. The donors should also vary in age so that the subset covers the entire distribution of ages in the dataset. then we should select a subset of about 500 genes.  these should include:
-- a set of genes from a pathway (TNF-alpha Signaling via NF-KB) known to be associated with aging, found in tests/data/HALLMARK_TNFA_SIGNALING_VIA_NFKB.v2025.1.Hs.json
-- a set of about 200 other highly variable genes
-- a set of about 100 weakly variable genes
+## Test Dataset
 
-This dataset should be saved to tests/data/testdata.h5ad.
+The test dataset is created from the source data using `tests/create_test_data.py`:
+- Filters to top 2 most frequent cell types
+- Selects 30 donors (28 high cell count, 2 low cell count)
+- Selects ~500 genes (pathway genes + HVGs + low variance genes)
+- Saved to `tests/data/dataset-test_raw.h5ad`
 
 ## Coding guidelines
 

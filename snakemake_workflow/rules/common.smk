@@ -5,10 +5,7 @@ from pathlib import Path
 
 
 def sanitize_cell_type(cell_type: str) -> str:
-    """Sanitize cell type name for filesystem use.
-
-    Matches the function used in Prefect workflow.
-    """
+    """Sanitize cell type name for filesystem use."""
     return cell_type.replace(" ", "_").replace(",", "").replace("-", "_")
 
 
