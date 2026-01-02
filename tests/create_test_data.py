@@ -14,6 +14,7 @@ This script:
 Requires DATADIR to be set in .env file pointing to the base data directory.
 """
 
+import argparse
 import json
 import os
 from pathlib import Path
@@ -332,6 +333,18 @@ def create_test_dataset(
 
 
 if __name__ == "__main__":
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(
+        description="Create a minimal test dataset for RNA-seq workflow tests."
+    )
+    parser.add_argument(
+        "-o", "--output-dir",
+        type=Path,
+        default=None,
+        help="Directory to save the output file. Defaults to tests/data/",
+    )
+    args = parser.parse_args()
+
     # Load environment variables from .env file
     load_dotenv()
 
@@ -349,8 +362,13 @@ if __name__ == "__main__":
         raise FileNotFoundError(f"Source data not found: {source_path}")
 
     tests_dir = Path(__file__).parent
-    output_path = tests_dir / "data" / "dataset-test_raw.h5ad"
     pathway_file = tests_dir / "data" / "HALLMARK_TNFA_SIGNALING_VIA_NFKB.v2025.1.Hs.json"
+
+    # Determine output path
+    if args.output_dir is not None:
+        output_path = args.output_dir / "dataset-test_raw.h5ad"
+    else:
+        output_path = tests_dir / "data" / "dataset-test_raw.h5ad"
 
     # Set random seed for reproducibility
     np.random.seed(42)
