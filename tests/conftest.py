@@ -37,7 +37,7 @@ def test_adata(test_data_dir) -> ad.AnnData:
 
     This fixture is session-scoped to avoid reloading the data for each test.
     """
-    test_file = test_data_dir / "testdata.h5ad"
+    test_file = test_data_dir / "dataset-test_raw.h5ad"
     if not test_file.exists():
         pytest.skip("Test data not found. Run tests/create_test_data.py first.")
     return ad.read_h5ad(test_file)

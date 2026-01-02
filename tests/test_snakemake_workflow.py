@@ -137,7 +137,7 @@ class TestSnakemakeWithTestData:
     ):
         """Test running preprocessing rules with test data."""
         # Check if test data exists
-        test_data = test_data_dir / "testdata.h5ad"
+        test_data = test_data_dir / "dataset-test_raw.h5ad"
         if not test_data.exists():
             pytest.skip("Test data not found")
 
