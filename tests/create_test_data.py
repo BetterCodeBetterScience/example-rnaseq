@@ -322,10 +322,10 @@ def create_test_dataset(
     if "cell_type" in adata_subset.obs.columns:
         print(f"Cell types: {adata_subset.obs['cell_type'].unique().tolist()}")
 
-    # Save
-    print(f"\nSaving to {output_path}...")
+    # Save with compression
+    print(f"\nSaving to {output_path} (with gzip compression)...")
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    adata_subset.write_h5ad(output_path)
+    adata_subset.write_h5ad(output_path, compression="gzip")
     print("Done!")
 
     return adata_subset
