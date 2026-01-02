@@ -1,14 +1,20 @@
 # Configuration for Snakemake scRNA-seq immune aging workflow
 #
 # Usage:
-#   snakemake --cores 8 --config datadir=/path/to/data
+#   snakemake --cores 8
 #
 # Override any parameter:
-#   snakemake --cores 8 --config datadir=/path/to/data dataset_name=MyDataset
+#   snakemake --cores 8 --config dataset_name=MyDataset
+#
+# Use a custom raw data file:
+#   snakemake --cores 8 --config raw_data_file=/path/to/my_data.h5ad
 
 # Dataset configuration
 dataset_name: "OneK1K"
 url: "https://datasets.cellxgene.cziscience.com/a3f5651f-cd1a-4d26-8165-74964b79b4f2.h5ad"
+# Raw data file path (default: dataset-{dataset_name}_subset-immune_raw.h5ad)
+# Can be overridden on command line: --config raw_data_file=/path/to/data.h5ad
+raw_data_file: ""
 
 # Step 2: Filtering parameters
 filtering:

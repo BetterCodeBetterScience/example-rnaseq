@@ -13,7 +13,7 @@ These rules handle the initial data processing pipeline:
 # Step 1: Data Download
 rule download_data:
     output:
-        f"dataset-{DATASET}_subset-immune_raw.h5ad",
+        RAW_DATA_FILE,
     params:
         url=config["url"],
     log:
@@ -27,7 +27,7 @@ rule download_data:
 # Step 2: Data Filtering
 rule filter_data:
     input:
-         f"dataset-{DATASET}_subset-immune_raw.h5ad",
+        RAW_DATA_FILE,
     output:
         checkpoint=CHECKPOINT_DIR / bids_checkpoint_name(DATASET, 2, "filtered"),
         fig_donor_counts=report(
