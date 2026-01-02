@@ -7,6 +7,9 @@ __pycache__
 ._*
 .snakemake
 
+# need to keep this out to prevent problems across linux vs mac
+uv.lock
+
 # Workflow output directories
 **/simple_workflow/*/output/
 
