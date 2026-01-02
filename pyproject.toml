@@ -7,6 +7,7 @@ requires-python = ">=3.11"
 dependencies = [
     "anndata>=0.12.7",
     "dask>=2025.12.0",
+    "defopt>=7.0.0",
     "fastparquet>=2025.12.0",
     "gseapy>=1.1.11",
     "h5py>=3.15.1",
@@ -14,6 +15,7 @@ dependencies = [
     "harmonypy>=0.0.10",
     "igraph>=1.0.0",
     "ipython>=9.8.0",
+    "makeprov>=0.4.3",
     "pyarrow>=22.0.0",
     "pydeseq2>=0.5.3",
     "pytest>=9.0.2",
