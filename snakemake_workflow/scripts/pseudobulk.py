@@ -6,15 +6,23 @@ all valid cell types, which enables downstream dynamic rules.
 # ruff: noqa: F821
 
 import json
+import logging
+import sys
 from pathlib import Path
 
-from example_rnaseq.pseudobulk import (
-    run_pseudobulk_pipeline,
+from example_rnaseq.checkpoint import load_checkpoint, save_checkpoint
+from example_rnaseq.pseudobulk import run_pseudobulk_pipeline
+
+# Configure logging to write to both log file and stderr
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler(snakemake.log[0]),
+        logging.StreamHandler(sys.stderr),
+    ],
 )
-from example_rnaseq.checkpoint import (
-    load_checkpoint,
-    save_checkpoint,
-)
+logger = logging.getLogger(__name__)
 
 
 def sanitize_cell_type(cell_type: str) -> str:
@@ -47,20 +55,20 @@ def main():
         figure_dir.mkdir(parents=True, exist_ok=True)
 
     # Load step 2 checkpoint to get var_to_feature mapping (has feature_name)
-    print(f"Loading filtered data for var_to_feature: {filtered_checkpoint}")
+    logger.info(f"Loading filtered data for var_to_feature: {filtered_checkpoint}")
     adata_filtered = load_checkpoint(filtered_checkpoint)
     var_to_feature = dict(
         zip(adata_filtered.var_names, adata_filtered.var["feature_name"])
     )
-    print(f"Built var_to_feature mapping with {len(var_to_feature)} genes")
+    logger.info(f"Built var_to_feature mapping with {len(var_to_feature)} genes")
 
     # Load step 3 checkpoint for raw counts (after QC filtering)
-    print(f"Loading raw counts from: {qc_checkpoint}")
+    logger.info(f"Loading raw counts from: {qc_checkpoint}")
     adata_raw = load_checkpoint(qc_checkpoint)
-    print(f"Loaded: {adata_raw}")
+    logger.info(f"Loaded: {adata_raw}")
 
     # Run pseudobulking on raw counts
-    print("Running pseudobulking pipeline...")
+    logger.info("Running pseudobulking pipeline...")
     pb_adata = run_pseudobulk_pipeline(
         adata_raw,
         group_col=group_col,
@@ -70,11 +78,11 @@ def main():
         figure_dir=figure_dir,
         layer=None,  # Use .X directly (raw counts)
     )
-    print(f"Pseudobulk data: {pb_adata}")
+    logger.info(f"Pseudobulk data: {pb_adata}")
 
     # Save pseudobulk checkpoint
     save_checkpoint(pb_adata, output_pseudobulk)
-    print(f"Saved pseudobulk checkpoint: {output_pseudobulk}")
+    logger.info(f"Saved pseudobulk checkpoint: {output_pseudobulk}")
 
     # Determine valid cell types (with sufficient samples)
     all_cell_types = pb_adata.obs[group_col].unique().tolist()
@@ -85,12 +93,12 @@ def main():
     ]
     skipped_cell_types = [ct for ct in all_cell_types if ct not in valid_cell_types]
 
-    print(f"\nFound {len(all_cell_types)} cell types total")
-    print(
+    logger.info(f"Found {len(all_cell_types)} cell types total")
+    logger.info(
         f"Valid cell types (>= {min_samples_per_cell_type} samples): {len(valid_cell_types)}"
     )
     if skipped_cell_types:
-        print(f"Skipped cell types (insufficient samples): {skipped_cell_types}")
+        logger.info(f"Skipped cell types (insufficient samples): {skipped_cell_types}")
 
     # Write cell types JSON (enables dynamic rules)
     cell_types_data = {
@@ -105,12 +113,12 @@ def main():
 
     with open(output_cell_types, "w") as f:
         json.dump(cell_types_data, f, indent=2)
-    print(f"Saved cell types JSON: {output_cell_types}")
+    logger.info(f"Saved cell types JSON: {output_cell_types}")
 
     # Write var_to_feature mapping (needed for DE)
     with open(output_var_to_feature, "w") as f:
         json.dump(var_to_feature, f)
-    print(f"Saved var_to_feature mapping: {output_var_to_feature}")
+    logger.info(f"Saved var_to_feature mapping: {output_var_to_feature}")
 
 
 if __name__ == "__main__":

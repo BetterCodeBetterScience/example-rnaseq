@@ -1,19 +1,28 @@
 """Snakemake script for Step 2: Data Filtering."""
+# ruff: noqa: F821
 
+import logging
+import sys
 from pathlib import Path
 
-from example_rnaseq.data_filtering import (
-    run_filtering_pipeline,
-)
-from example_rnaseq.data_loading import (
-    load_lazy_anndata,
-)
 from example_rnaseq.checkpoint import save_checkpoint
+from example_rnaseq.data_filtering import run_filtering_pipeline
+from example_rnaseq.data_loading import load_lazy_anndata
+
+# Configure logging to write to both log file and stderr
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler(snakemake.log[0]),
+        logging.StreamHandler(sys.stderr),
+    ],
+)
+logger = logging.getLogger(__name__)
 
 
 def main():
     """Load data and run filtering pipeline."""
-    # ruff: noqa: F821
     input_file = Path(snakemake.input[0])
     output_file = Path(snakemake.output.checkpoint)
 
@@ -30,11 +39,11 @@ def main():
     if figure_dir:
         figure_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Loading data from: {input_file}")
+    logger.info(f"Loading data from: {input_file}")
     adata = load_lazy_anndata(input_file)
-    print(f"Loaded dataset: {adata}")
+    logger.info(f"Loaded dataset: {adata}")
 
-    print("Running filtering pipeline...")
+    logger.info("Running filtering pipeline...")
     adata = run_filtering_pipeline(
         adata,
         cutoff_percentile=cutoff_percentile,
@@ -42,11 +51,11 @@ def main():
         percent_donors=percent_donors,
         figure_dir=figure_dir,
     )
-    print(f"Dataset after filtering: {adata}")
+    logger.info(f"Dataset after filtering: {adata}")
 
     # Save checkpoint
     save_checkpoint(adata, output_file)
-    print(f"Saved checkpoint: {output_file}")
+    logger.info(f"Saved checkpoint: {output_file}")
 
 
 if __name__ == "__main__":

@@ -5,8 +5,21 @@ It creates a summary file indicating successful completion.
 """
 # ruff: noqa: F821
 
+import logging
+import sys
 from datetime import datetime
 from pathlib import Path
+
+# Configure logging to write to both log file and stderr
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler(snakemake.log[0]),
+        logging.StreamHandler(sys.stderr),
+    ],
+)
+logger = logging.getLogger(__name__)
 
 
 def main():
@@ -14,7 +27,7 @@ def main():
     output_file = Path(snakemake.output[0])
     input_files = [Path(f) for f in snakemake.input]
 
-    print(f"Aggregating {len(input_files)} result files...")
+    logger.info(f"Aggregating {len(input_files)} result files...")
 
     # Group files by cell type
     cell_types = set()
@@ -48,8 +61,8 @@ def main():
         f.write("\n")
         f.write(f"Total output files: {summary['output_files']}\n")
 
-    print(f"Summary written to: {output_file}")
-    print(f"Analyzed {len(cell_types)} cell types")
+    logger.info(f"Summary written to: {output_file}")
+    logger.info(f"Analyzed {len(cell_types)} cell types")
 
 
 if __name__ == "__main__":

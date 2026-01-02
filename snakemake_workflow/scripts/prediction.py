@@ -1,22 +1,30 @@
 """Snakemake script for Step 11: Predictive Modeling."""
+# ruff: noqa: F821
 
 import json
+import logging
+import sys
 from pathlib import Path
 
 import pandas as pd
 
-from example_rnaseq.predictive_modeling import (
-    run_predictive_modeling_pipeline,
+from example_rnaseq.checkpoint import load_checkpoint, save_checkpoint
+from example_rnaseq.predictive_modeling import run_predictive_modeling_pipeline
+
+# Configure logging to write to both log file and stderr
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler(snakemake.log[0]),
+        logging.StreamHandler(sys.stderr),
+    ],
 )
-from example_rnaseq.checkpoint import (
-    load_checkpoint,
-    save_checkpoint,
-)
+logger = logging.getLogger(__name__)
 
 
 def unsanitize_cell_type(sanitized: str, cell_types_file: Path) -> str:
     """Convert sanitized cell type back to original name."""
-    # ruff: noqa: F821
     with open(cell_types_file) as f:
         data = json.load(f)
     # Reverse lookup
@@ -41,7 +49,7 @@ def main():
     # Get original cell type name
     cell_type = unsanitize_cell_type(sanitized_cell_type, cell_types_file)
 
-    print(f"Running predictive modeling for cell type: {cell_type}")
+    logger.info(f"Running predictive modeling for cell type: {cell_type}")
 
     # Create output directories
     output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -72,7 +80,7 @@ def main():
 
     # Save results
     save_checkpoint(prediction_results, output_file)
-    print(f"Prediction results saved: {output_file}")
+    logger.info(f"Prediction results saved: {output_file}")
 
 
 if __name__ == "__main__":
