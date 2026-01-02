@@ -222,6 +222,29 @@ def plot_enrichr_results(
     plt.close()
 
 
+def plot_empty_enrichr_figure(figure_dir: Path | None = None) -> None:
+    """Create a placeholder figure when no pathways are significant.
+
+    Parameters
+    ----------
+    figure_dir : Path, optional
+        Directory to save figures
+    """
+    plt.figure(figsize=(10, 8))
+    plt.text(
+        0.5, 0.5,
+        "No significant pathways found",
+        ha="center", va="center",
+        fontsize=14, color="gray"
+    )
+    plt.axis("off")
+    plt.title("Enrichr Pathway Analysis", fontsize=14)
+
+    if figure_dir is not None:
+        plt.savefig(figure_dir / "enrichr_pathways.png", dpi=300, bbox_inches="tight")
+    plt.close()
+
+
 def run_overrepresentation_pipeline(
     results_df: pd.DataFrame,
     gene_sets: list[str] | None = None,
@@ -258,5 +281,8 @@ def run_overrepresentation_pipeline(
     combined = prepare_enrichr_plot_data(enr_up, enr_down, n_top)
     if combined is not None:
         plot_enrichr_results(combined, figure_dir)
+    else:
+        # Create placeholder figure when no significant pathways
+        plot_empty_enrichr_figure(figure_dir)
 
     return enr_up, enr_down
