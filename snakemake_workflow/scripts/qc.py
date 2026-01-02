@@ -1,19 +1,27 @@
 """Snakemake script for Step 3: Quality Control."""
+# ruff: noqa: F821
 
+import logging
+import sys
 from pathlib import Path
 
-from example_rnaseq.quality_control import (
-    run_qc_pipeline,
+from example_rnaseq.checkpoint import load_checkpoint, save_checkpoint
+from example_rnaseq.quality_control import run_qc_pipeline
+
+# Configure logging to write to both log file and stderr
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler(snakemake.log[0]),
+        logging.StreamHandler(sys.stderr),
+    ],
 )
-from example_rnaseq.checkpoint import (
-    load_checkpoint,
-    save_checkpoint,
-)
+logger = logging.getLogger(__name__)
 
 
 def main():
     """Run quality control pipeline."""
-    # ruff: noqa: F821
     input_file = Path(snakemake.input[0])
     output_file = Path(snakemake.output.checkpoint)
 
@@ -33,11 +41,11 @@ def main():
     if figure_dir:
         figure_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Loading data from: {input_file}")
+    logger.info(f"Loading data from: {input_file}")
     adata = load_checkpoint(input_file)
-    print(f"Loaded dataset: {adata}")
+    logger.info(f"Loaded dataset: {adata}")
 
-    print("Running QC pipeline...")
+    logger.info("Running QC pipeline...")
     adata = run_qc_pipeline(
         adata,
         min_genes=min_genes,
@@ -48,11 +56,11 @@ def main():
         expected_doublet_rate=expected_doublet_rate,
         figure_dir=figure_dir,
     )
-    print(f"Dataset after QC: {adata}")
+    logger.info(f"Dataset after QC: {adata}")
 
     # Save checkpoint
     save_checkpoint(adata, output_file)
-    print(f"Saved checkpoint: {output_file}")
+    logger.info(f"Saved checkpoint: {output_file}")
 
 
 if __name__ == "__main__":
