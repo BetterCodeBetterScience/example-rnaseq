@@ -9,15 +9,19 @@ This script:
    - ~200 highly variable genes
    - ~100 weakly variable genes
 4. Saves the subset to tests/data/testdata.h5ad
+
+Requires DATADIR to be set in .env file pointing to the base data directory.
 """
 
 import json
+import os
 from pathlib import Path
 
 import anndata as ad
 import numpy as np
 import pandas as pd
 import scanpy as sc
+from dotenv import load_dotenv
 
 
 def load_pathway_genes(pathway_file: Path) -> list[str]:
@@ -242,8 +246,22 @@ def create_test_dataset(
 
 
 if __name__ == "__main__":
+    # Load environment variables from .env file
+    load_dotenv()
+
+    # Get data directory from environment
+    datadir = os.getenv("DATADIR")
+    if not datadir:
+        raise ValueError(
+            "DATADIR environment variable not set. "
+            "Please create a .env file with DATADIR=/path/to/your/data"
+        )
+
     # Paths
-    source_path = Path("/Users/poldrack/data_unsynced/BCBS/immune_aging/dataset-OneK1K_subset-immune_raw.h5ad")
+    source_path = Path(datadir) / "immune_aging" / "dataset-OneK1K_subset-immune_raw.h5ad"
+    if not source_path.exists():
+        raise FileNotFoundError(f"Source data not found: {source_path}")
+
     tests_dir = Path(__file__).parent
     output_path = tests_dir / "data" / "testdata.h5ad"
     pathway_file = tests_dir / "data" / "HALLMARK_TNFA_SIGNALING_VIA_NFKB.v2025.1.Hs.json"
