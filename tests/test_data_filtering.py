@@ -58,7 +58,7 @@ class TestFilterDonorsByCellCount:
 
         filtered = filter_donors_by_cell_count(minimal_adata, median_count)
 
-        # Should have fewer cells
+        # Should have no more cells than original
         assert filtered.n_obs <= minimal_adata.n_obs
 
         # Remaining donors should meet threshold
