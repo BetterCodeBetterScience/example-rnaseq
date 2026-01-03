@@ -77,3 +77,9 @@ Please determine why these are being skipped and ensure that they are included i
 
 These are expected given the small test dataset size.  please capture these warnings so that they don't appear in the test summary.
     - Solution: Added `@pytest.mark.filterwarnings` decorators to the test method to suppress these expected warnings from pydeseq2. The warnings are documented in the test docstring explaining they occur due to the small test dataset size.
+
+
+[x] After enabling `-W error::FutureWarning` for pytest, I get the following error:
+
+FAILED tests/test_differential_expression.py::TestDeseq2Integration::test_run_deseq2_on_minimal_data - FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error ...
+    - Solution: The FutureWarning originates from inside pydeseq2 when it attempts to set a boolean array into a float64 pandas column during dispersion fitting. This is internal to pydeseq2's pandas operations and cannot be fixed in our code. Added `@pytest.mark.filterwarnings("ignore:Setting an item of incompatible dtype is deprecated:FutureWarning")` decorator to suppress this expected warning from the upstream library.

@@ -154,12 +154,16 @@ class TestDeseq2Integration:
     @pytest.mark.filterwarnings(
         "ignore:As the residual degrees of freedom is less than 3:UserWarning"
     )
+    @pytest.mark.filterwarnings(
+        "ignore:Setting an item of incompatible dtype is deprecated:FutureWarning"
+    )
     def test_run_deseq2_on_minimal_data(self, minimal_pseudobulk_adata):
         """Test running DESeq2 on minimal data.
 
         Note: The filterwarnings markers suppress expected warnings from pydeseq2
         that occur due to the small test dataset size (few samples, low degrees
-        of freedom). These are not indicative of problems with the code.
+        of freedom) and from pandas dtype coercion inside pydeseq2. These are
+        not indicative of problems with the code.
         """
         from example_rnaseq.differential_expression import run_deseq2
 

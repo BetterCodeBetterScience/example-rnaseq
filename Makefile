@@ -32,7 +32,7 @@ test-all: $(TEST_DATA)
 
 # Run full test suite with coverage report (requires test data)
 test-coverage: $(TEST_DATA)
-	uv run pytest tests/ --cov=src/example_rnaseq --cov-report=term-missing --cov-report=html -v
+	uv run pytest tests/ -W error::FutureWarning --cov=src/example_rnaseq --cov-report=term-missing --cov-report=html -v
 
 # Clean up generated files
 clean:
