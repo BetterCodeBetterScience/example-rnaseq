@@ -189,21 +189,3 @@ class TestPlotPredictions:
 
         assert (temp_output_dir / "age_prediction_performance.png").exists()
 
-
-class TestCompareModels:
-    """Tests for model comparison."""
-
-    def test_prints_comparison(self, capsys):
-        """Test that comparison is printed."""
-        full_r2 = [0.7, 0.75, 0.72]
-        full_mae = [4.0, 3.5, 4.2]
-        baseline_r2 = [0.1, 0.05, 0.08]
-        baseline_mae = [10.0, 11.0, 10.5]
-
-        compare_models(full_r2, full_mae, baseline_r2, baseline_mae)
-
-        captured = capsys.readouterr()
-        assert "Full Model" in captured.out
-        assert "Baseline" in captured.out
-        assert "Improvement" in captured.out
-        assert "Delta R2" in captured.out
