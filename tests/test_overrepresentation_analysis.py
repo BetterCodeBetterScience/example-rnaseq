@@ -6,6 +6,8 @@ import pytest
 
 from example_rnaseq.overrepresentation_analysis import (
     get_significant_gene_lists,
+    plot_empty_enrichr_figure,
+    plot_enrichr_results,
     prepare_enrichr_plot_data,
 )
 
@@ -150,3 +152,40 @@ class TestEnrichrIntegration:
 
         result = run_enrichr([])
         assert result is None
+
+
+class TestPlotEnrichrResults:
+    """Tests for Enrichr plot functions (smoke tests)."""
+
+    @pytest.fixture
+    def sample_enrichr_combined(self):
+        """Create sample combined Enrichr data for plotting."""
+        return pd.DataFrame({
+            "Term": [f"Pathway_{i}" for i in range(10)],
+            "Adjusted P-value": np.random.uniform(0.001, 0.1, 10),
+            "Overlap": [f"{i}/100" for i in range(5, 15)],
+            "Direction": ["Upregulated"] * 5 + ["Downregulated"] * 5,
+            "Color": ["Red"] * 5 + ["Blue"] * 5,
+            "log_p": np.random.uniform(1, 3, 10),
+            "Gene_Count": list(range(5, 15)),
+        })
+
+    def test_plot_enrichr_results_no_error(self, sample_enrichr_combined, temp_output_dir):
+        """Test that plot_enrichr_results runs without error."""
+        plot_enrichr_results(sample_enrichr_combined, temp_output_dir)
+        assert (temp_output_dir / "enrichr_pathways.png").exists()
+
+    def test_plot_enrichr_results_no_save(self, sample_enrichr_combined):
+        """Test that plot_enrichr_results runs without saving."""
+        # Should not raise even without figure_dir
+        plot_enrichr_results(sample_enrichr_combined, figure_dir=None)
+
+    def test_plot_empty_enrichr_figure(self, temp_output_dir):
+        """Test plotting empty enrichr figure."""
+        plot_empty_enrichr_figure(temp_output_dir)
+        assert (temp_output_dir / "enrichr_pathways.png").exists()
+
+    def test_plot_empty_enrichr_figure_no_save(self):
+        """Test plotting empty enrichr figure without saving."""
+        # Should not raise even without figure_dir
+        plot_empty_enrichr_figure(figure_dir=None)

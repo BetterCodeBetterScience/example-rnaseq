@@ -246,11 +246,18 @@ def compute_umap_for_qc(adata: ad.AnnData, n_pcs: int = 30) -> ad.AnnData:
     # Work on a copy to avoid modifying the original
     adata_temp = adata.copy()
 
+    # Store raw counts for seurat_v3 HVG selection (requires raw counts)
+    adata_temp.layers["counts"] = adata_temp.X.copy()
+
     # Basic preprocessing for UMAP computation
     sc.pp.normalize_total(adata_temp, target_sum=1e4)
     sc.pp.log1p(adata_temp)
-    sc.pp.highly_variable_genes(adata_temp, n_top_genes=2000, flavor="seurat_v3")
-    sc.pp.pca(adata_temp, n_comps=n_pcs, use_highly_variable=True)
+    # Use seurat_v3 with counts layer (raw counts) for proper HVG selection
+    sc.pp.highly_variable_genes(
+        adata_temp, n_top_genes=2000, flavor="seurat_v3", layer="counts"
+    )
+    # Use mask_var instead of deprecated use_highly_variable parameter
+    sc.pp.pca(adata_temp, n_comps=n_pcs, mask_var="highly_variable")
     sc.pp.neighbors(adata_temp, n_neighbors=15, n_pcs=n_pcs)
     sc.tl.umap(adata_temp)
 
@@ -360,8 +367,9 @@ def run_qc_pipeline(
     adata = compute_umap_for_qc(adata)
     plot_doublets(adata, figure_dir)
 
-    # Filter doublets
-    adata = filter_doublets(adata)
+    # Filter doublets and make a copy to avoid view-related warnings
+    # when modifying layers
+    adata = filter_doublets(adata).copy()
 
     # Save raw counts for HVG selection (step 4) and pseudobulking (step 7)
     # Note: Raw counts are also in .X at this point, which will be used

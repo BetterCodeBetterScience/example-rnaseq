@@ -148,8 +148,19 @@ class TestGetSignificantGenes:
 class TestDeseq2Integration:
     """Integration tests for DESeq2 (marked slow)."""
 
+    @pytest.mark.filterwarnings(
+        "ignore:The dispersion trend curve fitting did not converge:UserWarning"
+    )
+    @pytest.mark.filterwarnings(
+        "ignore:As the residual degrees of freedom is less than 3:UserWarning"
+    )
     def test_run_deseq2_on_minimal_data(self, minimal_pseudobulk_adata):
-        """Test running DESeq2 on minimal data."""
+        """Test running DESeq2 on minimal data.
+
+        Note: The filterwarnings markers suppress expected warnings from pydeseq2
+        that occur due to the small test dataset size (few samples, low degrees
+        of freedom). These are not indicative of problems with the code.
+        """
         from example_rnaseq.differential_expression import run_deseq2
 
         adata = minimal_pseudobulk_adata.copy()

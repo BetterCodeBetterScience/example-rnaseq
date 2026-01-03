@@ -164,7 +164,9 @@ def run_pca(
     AnnData
         AnnData with PCA results
     """
-    sc.tl.pca(adata, svd_solver=svd_solver, use_highly_variable=use_highly_variable)
+    # Use mask_var parameter instead of deprecated use_highly_variable
+    mask_var = "highly_variable" if use_highly_variable else None
+    sc.tl.pca(adata, svd_solver=svd_solver, mask_var=mask_var)
     return adata
 
 

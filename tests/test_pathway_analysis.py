@@ -6,6 +6,8 @@ import pytest
 
 from conftest import is_sorted
 from example_rnaseq.pathway_analysis import (
+    get_gsea_top_terms,
+    plot_gsea_results,
     prepare_gsea_plot_data,
     prepare_ranked_list,
 )
@@ -105,11 +107,11 @@ class TestPrepareGseaPlotData:
 class TestGseaIntegration:
     """Integration tests for GSEA (marked slow, requires network)."""
 
-    def test_run_gsea_prerank(self, sample_deseq_results):
-        """Test running GSEA prerank."""
+    def test_run_gsea_prerank(self, sample_deseq_results_real_genes):
+        """Test running GSEA prerank with real gene symbols."""
         from example_rnaseq.pathway_analysis import run_gsea_prerank
 
-        rank_df = prepare_ranked_list(sample_deseq_results)
+        rank_df = prepare_ranked_list(sample_deseq_results_real_genes)
 
         # This requires network access
         try:
@@ -117,7 +119,79 @@ class TestGseaIntegration:
                 rank_df,
                 gene_sets=["MSigDB_Hallmark_2020"],
                 permutation_num=10,  # Minimal for speed
+                min_size=5,  # Lower threshold for test data
             )
             assert prerank_res is not None
-        except Exception as e:
-            pytest.skip(f"GSEA prerank failed (likely network issue): {e}")
+            assert hasattr(prerank_res, "res2d")
+            assert len(prerank_res.res2d) > 0
+        except ConnectionError as e:
+            pytest.skip(f"GSEA prerank failed due to network issue: {e}")
+        except TimeoutError as e:
+            pytest.skip(f"GSEA prerank timed out: {e}")
+
+
+class TestGetGseaTopTerms:
+    """Tests for GSEA top terms extraction."""
+
+    @pytest.fixture
+    def mock_gsea_result(self):
+        """Create mock GSEA result object."""
+        class MockGSEA:
+            def __init__(self):
+                self.res2d = pd.DataFrame({
+                    "Term": [f"Pathway_{i}" for i in range(20)],
+                    "NES": np.linspace(2, -2, 20),
+                    "FDR q-val": np.random.uniform(0, 0.5, 20),
+                    "Lead_genes": ["GENE1;GENE2;GENE3"] * 20,
+                })
+        return MockGSEA()
+
+    def test_returns_top_terms(self, mock_gsea_result, capsys):
+        """Test that top and bottom terms are returned."""
+        top_up, top_down = get_gsea_top_terms(mock_gsea_result, n_top=5)
+
+        assert len(top_up) == 5
+        assert len(top_down) == 5
+
+    def test_top_terms_are_sorted(self, mock_gsea_result, capsys):
+        """Test that terms are sorted by NES."""
+        top_up, top_down = get_gsea_top_terms(mock_gsea_result, n_top=5)
+
+        # Top up should have highest NES
+        assert top_up["NES"].max() == mock_gsea_result.res2d["NES"].max()
+        # Top down should have lowest NES
+        assert top_down["NES"].min() == mock_gsea_result.res2d["NES"].min()
+
+    def test_prints_output(self, mock_gsea_result, capsys):
+        """Test that function prints to stdout."""
+        get_gsea_top_terms(mock_gsea_result, n_top=3)
+
+        captured = capsys.readouterr()
+        assert "Top Upregulated Pathways" in captured.out
+        assert "Top Downregulated Pathways" in captured.out
+
+
+class TestPlotGseaResults:
+    """Tests for GSEA plot functions (smoke tests)."""
+
+    @pytest.fixture
+    def sample_gsea_combined(self):
+        """Create sample combined GSEA data for plotting."""
+        return pd.DataFrame({
+            "Term": [f"Pathway_{i}" for i in range(10)],
+            "NES": np.linspace(2, -2, 10),
+            "FDR q-val": np.random.uniform(0.001, 0.25, 10),
+            "Direction": ["Upregulated"] * 5 + ["Downregulated"] * 5,
+            "log_FDR": np.random.uniform(0.5, 3, 10),
+            "Count": list(range(10, 20)),
+        })
+
+    def test_plot_gsea_results_no_error(self, sample_gsea_combined, temp_output_dir):
+        """Test that plot_gsea_results runs without error."""
+        plot_gsea_results(sample_gsea_combined, temp_output_dir)
+        assert (temp_output_dir / "gsea_pathways.png").exists()
+
+    def test_plot_gsea_results_no_save(self, sample_gsea_combined):
+        """Test that plot_gsea_results runs without saving."""
+        # Should not raise even without figure_dir
+        plot_gsea_results(sample_gsea_combined, figure_dir=None)

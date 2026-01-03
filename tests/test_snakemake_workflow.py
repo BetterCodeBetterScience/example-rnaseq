@@ -67,6 +67,7 @@ class TestSnakemakeDryRun:
                 "--configfile", str(config_file),
                 "--dry-run",
                 "--quiet",
+                "--cores", "1",
             ],
             cwd=str(workflow_dir),
             capture_output=True,

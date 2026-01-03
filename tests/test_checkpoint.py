@@ -16,8 +16,10 @@ from example_rnaseq.checkpoint import (
     load_checkpoint,
     parse_bids_checkpoint_name,
     run_with_checkpoint,
+    run_with_checkpoint_multi,
     save_checkpoint,
 )
+from example_rnaseq.execution_log import create_execution_log
 
 
 class TestBidsCheckpointName:
@@ -280,3 +282,176 @@ class TestClearCheckpoints:
 
         assert len(removed) == 2
         assert (temp_checkpoint_dir / "dataset-test_step-01_desc-a.h5ad").exists()
+
+
+class TestRunWithCheckpointMulti:
+    """Tests for multi-checkpoint execution."""
+
+    def test_executes_and_saves_multiple(self, temp_checkpoint_dir):
+        """Test that function is executed and multiple results saved."""
+        files = {
+            "result1": temp_checkpoint_dir / "result1.pkl",
+            "result2": temp_checkpoint_dir / "result2.pkl",
+        }
+        call_count = [0]
+
+        def my_func(x):
+            call_count[0] += 1
+            return {"result1": x * 2, "result2": x * 3}
+
+        result = run_with_checkpoint_multi("test", files, my_func, 5)
+
+        assert result == {"result1": 10, "result2": 15}
+        assert call_count[0] == 1
+        assert files["result1"].exists()
+        assert files["result2"].exists()
+
+    def test_loads_from_cache(self, temp_checkpoint_dir):
+        """Test that cached results are loaded."""
+        files = {
+            "a": temp_checkpoint_dir / "a.pkl",
+            "b": temp_checkpoint_dir / "b.pkl",
+        }
+        call_count = [0]
+
+        def my_func():
+            call_count[0] += 1
+            return {"a": "value_a", "b": "value_b"}
+
+        # First call - executes
+        run_with_checkpoint_multi("test", files, my_func)
+        assert call_count[0] == 1
+
+        # Second call - loads from cache
+        result = run_with_checkpoint_multi("test", files, my_func)
+        assert result == {"a": "value_a", "b": "value_b"}
+        assert call_count[0] == 1  # Not called again
+
+    def test_force_rerun(self, temp_checkpoint_dir):
+        """Test that force=True re-executes."""
+        files = {
+            "x": temp_checkpoint_dir / "x.pkl",
+        }
+        call_count = [0]
+
+        def my_func():
+            call_count[0] += 1
+            return {"x": call_count[0]}
+
+        run_with_checkpoint_multi("test", files, my_func)
+        result = run_with_checkpoint_multi("test", files, my_func, force=True)
+
+        assert call_count[0] == 2
+        assert result == {"x": 2}
+
+    def test_skip_save(self, temp_checkpoint_dir):
+        """Test that skip_save=True doesn't save."""
+        files = {"out": temp_checkpoint_dir / "no_save.pkl"}
+
+        result = run_with_checkpoint_multi(
+            "test", files, lambda: {"out": "data"}, skip_save=True
+        )
+
+        assert result == {"out": "data"}
+        assert not files["out"].exists()
+
+    def test_raises_if_return_not_dict(self, temp_checkpoint_dir):
+        """Test that non-dict return raises TypeError."""
+        files = {"out": temp_checkpoint_dir / "out.pkl"}
+
+        def bad_func():
+            return "not a dict"
+
+        with pytest.raises(TypeError, match="must return dict"):
+            run_with_checkpoint_multi("test", files, bad_func)
+
+    def test_raises_if_missing_key(self, temp_checkpoint_dir):
+        """Test that missing keys raise KeyError."""
+        files = {
+            "a": temp_checkpoint_dir / "a.pkl",
+            "b": temp_checkpoint_dir / "b.pkl",
+        }
+
+        def missing_key_func():
+            return {"a": 1}  # Missing 'b'
+
+        with pytest.raises(KeyError, match="missing key"):
+            run_with_checkpoint_multi("test", files, missing_key_func)
+
+
+class TestCheckpointWithExecutionLog:
+    """Tests for checkpoint execution with logging."""
+
+    def test_logs_step_on_execution(self, temp_checkpoint_dir):
+        """Test that execution log records step."""
+        log = create_execution_log("test_workflow")
+        filepath = temp_checkpoint_dir / "logged.pkl"
+
+        run_with_checkpoint(
+            "test_step",
+            filepath,
+            lambda: "result",
+            execution_log=log,
+            step_number=1,
+        )
+
+        assert len(log.steps) == 1
+        assert log.steps[0].step_name == "test_step"
+        assert log.steps[0].status == "completed"
+        assert log.steps[0].from_cache is False
+
+    def test_logs_cache_hit(self, temp_checkpoint_dir):
+        """Test that cache hit is recorded in log."""
+        log = create_execution_log("test_workflow")
+        filepath = temp_checkpoint_dir / "cached.pkl"
+
+        # First call - creates cache
+        run_with_checkpoint(
+            "step1", filepath, lambda: "data",
+            execution_log=log, step_number=1
+        )
+
+        # Second call with new log - should record cache hit
+        log2 = create_execution_log("test_workflow2")
+        run_with_checkpoint(
+            "step1", filepath, lambda: "new_data",
+            execution_log=log2, step_number=1
+        )
+
+        assert log2.steps[0].from_cache is True
+
+    def test_logs_parameters(self, temp_checkpoint_dir):
+        """Test that parameters are logged."""
+        log = create_execution_log("test_workflow")
+        filepath = temp_checkpoint_dir / "params.pkl"
+
+        run_with_checkpoint(
+            "param_step",
+            filepath,
+            lambda: "result",
+            execution_log=log,
+            step_number=1,
+            log_parameters={"n_genes": 100, "threshold": 0.05},
+        )
+
+        assert log.steps[0].parameters == {"n_genes": 100, "threshold": 0.05}
+
+    def test_multi_checkpoint_logs_step(self, temp_checkpoint_dir):
+        """Test that multi-checkpoint logs step."""
+        log = create_execution_log("test_workflow")
+        files = {
+            "out1": temp_checkpoint_dir / "out1.pkl",
+            "out2": temp_checkpoint_dir / "out2.pkl",
+        }
+
+        run_with_checkpoint_multi(
+            "multi_step",
+            files,
+            lambda: {"out1": 1, "out2": 2},
+            execution_log=log,
+            step_number=1,
+        )
+
+        assert len(log.steps) == 1
+        assert log.steps[0].step_name == "multi_step"
+        assert log.steps[0].status == "completed"

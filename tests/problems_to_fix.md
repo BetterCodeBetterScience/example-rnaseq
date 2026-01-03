@@ -40,3 +40,40 @@ Fixed problems marked with [x]
 [x] TestPseudobulkPipelineIntegration::test_pseudobulk_pipeline_runs fails with "Total counts should be preserved: input=93483552.0, output=93483547" - a difference of 5 counts out of ~93 million.
     - Solution: The absolute tolerance of `< 1` was too strict. Small floating-point discrepancies occur during sparse matrix aggregation and the `np.round().astype(int)` step in pseudobulk creation. Changed to a relative tolerance of `< 1e-5` (0.001%), which easily accommodates these rounding differences while still catching any real aggregation errors.
 
+[x] Two tests are still being skipped:
+    - tests/test_snakemake_workflow.py::TestSnakemakeDryRun::test_snakemake_dryrun
+    - tests/test_pathway_analysis.py::TestGseaIntegration::test_run_gsea_prerank
+Please determine why these are being skipped and ensure that they are included in the full test set.
+    - Solution: The snakemake dryrun test was failing because Snakemake requires `--cores` flag when rules use thread calculations. Added `--cores 1` to the snakemake command. The GSEA prerank test was skipping because it used synthetic gene names ("GENE0", "GENE1") that don't match real gene sets in MSigDB. Created a new fixture `sample_deseq_results_real_genes` that uses actual human gene symbols from the HALLMARK_TNFA_SIGNALING_VIA_NFKB pathway plus common housekeeping genes, and updated the test to use this fixture with `min_size=5` to accommodate the smaller gene set.
+
+[x] test coverage is only 69% at present for the modules in src/example_rnaseq.  Please examine the coverage report and identify where there are any important sections of code that are not currently being tested that should be added to the tests, and then add them.
+    - Solution: Added comprehensive tests for previously untested modules:
+      1. `execution_log.py` (0% → 98%): Added test_execution_log.py with 19 tests covering StepRecord, ExecutionLog, create_execution_log, and serialize_parameters functions.
+      2. `checkpoint.py` (70% → 96%): Added tests for run_with_checkpoint_multi and checkpoint-with-logging integration (10 new tests).
+      3. `overrepresentation_analysis.py` (51% → 75%): Added tests for plot_enrichr_results and plot_empty_enrichr_figure (4 new tests).
+      4. `pathway_analysis.py` (48% → 84%): Added tests for get_gsea_top_terms and plot_gsea_results (5 new tests).
+      Overall coverage improved from 69% to 88% with 38 new tests added (156 → 194 total tests).
+
+[x] Two warnings occur during testing that appear potentially consequential, please investigate these and determine whether they require changes to the code.
+    - tests/test_integration.py::TestQcPipelineIntegration::test_qc_pipeline_runs
+  /Users/poldrack/Dropbox/code/BetterCodeBetterScience/example-rnaseq/.venv/lib/python3.13/site-packages/legacy_api_wrap/__init__.py:88: UserWarning: `flavor='seurat_v3'` expects raw count data, but non-integers were found.
+    return fn(*args_all, **kw)
+
+    - tests/test_integration.py::TestQcPipelineIntegration::test_qc_pipeline_runs
+  /Users/poldrack/Dropbox/code/BetterCodeBetterScience/example-rnaseq/src/example_rnaseq/quality_control.py:369: ImplicitModificationWarning: Setting element `.layers['counts']` of view, initializing view as actual.
+    adata.layers["counts"] = adata.X.copy()
+    - Solution: Fixed both warnings:
+      1. `seurat_v3` warning: In `compute_umap_for_qc()`, stored raw counts in a `counts` layer before normalization, then passed `layer="counts"` to `sc.pp.highly_variable_genes()` so seurat_v3 operates on raw counts as expected.
+      2. `ImplicitModificationWarning`: Added `.copy()` after `filter_doublets()` to ensure we're working with an actual AnnData object rather than a view before modifying layers.
+      3. Also updated both `quality_control.py` and `preprocessing.py` to use the new `mask_var` parameter instead of the deprecated `use_highly_variable` parameter in PCA calls.
+
+[x] tests/test_differential_expression.py::TestDeseq2Integration::test_run_deseq2_on_minimal_data is giving warnings on a couple of tests:
+    - tests/test_differential_expression.py::TestDeseq2Integration::test_run_deseq2_on_minimal_data
+  /Users/poldrack/Dropbox/code/BetterCodeBetterScience/example-rnaseq/.venv/lib/python3.13/site-packages/pydeseq2/dds.py:820: UserWarning: The dispersion trend curve fitting did not converge. Switching to a mean-based dispersion trend.
+    self._fit_parametric_dispersion_trend(vst)
+- tests/test_differential_expression.py::TestDeseq2Integration::test_run_deseq2_on_minimal_data
+  /Users/poldrack/Dropbox/code/BetterCodeBetterScience/example-rnaseq/.venv/lib/python3.13/site-packages/pydeseq2/dds.py:548: UserWarning: As the residual degrees of freedom is less than 3, the distribution of log dispersions is especially asymmetric and likely to be poorly estimated by the MAD.
+    self.fit_dispersion_prior()
+
+These are expected given the small test dataset size.  please capture these warnings so that they don't appear in the test summary.
+    - Solution: Added `@pytest.mark.filterwarnings` decorators to the test method to suppress these expected warnings from pydeseq2. The warnings are documented in the test docstring explaining they occur due to the small test dataset size.

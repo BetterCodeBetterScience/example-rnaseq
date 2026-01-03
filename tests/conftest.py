@@ -223,6 +223,48 @@ def sample_deseq_results() -> pd.DataFrame:
     return results
 
 
+@pytest.fixture
+def sample_deseq_results_real_genes(pathway_genes) -> pd.DataFrame:
+    """Create sample DESeq2-like results with real gene symbols for GSEA testing.
+
+    Uses real human gene symbols from the HALLMARK_TNFA_SIGNALING_VIA_NFKB pathway
+    so that GSEA can match genes to the gene sets.
+    """
+    np.random.seed(42)
+
+    # Use real gene symbols from the pathway plus some common human genes
+    common_genes = [
+        "TP53", "BRCA1", "BRCA2", "EGFR", "MYC", "KRAS", "PIK3CA", "PTEN",
+        "AKT1", "MTOR", "GAPDH", "ACTB", "HPRT1", "B2M", "RPL13A", "SDHA",
+        "TBP", "YWHAZ", "UBC", "GUSB", "LDHA", "PKM", "ENO1", "ALDOA",
+        "PGAM1", "TPI1", "GPI", "PFKP", "HK1", "HK2"
+    ]
+    # Combine pathway genes with common genes for a realistic gene set
+    all_genes = list(pathway_genes[:70]) + common_genes  # ~100 genes total
+    n_genes = len(all_genes)
+
+    # Generate realistic-looking DE results
+    log2fc = np.random.normal(0, 1, n_genes)
+    pvalues = np.random.uniform(0, 1, n_genes)
+    # Make some genes significant (especially pathway genes)
+    pvalues[:15] = np.random.uniform(0, 0.01, 15)
+
+    # Adjust p-values (simple BH correction approximation)
+    padj = np.minimum(pvalues * n_genes / np.arange(1, n_genes + 1), 1.0)
+
+    results = pd.DataFrame({
+        "baseMean": np.random.exponential(100, n_genes),
+        "log2FoldChange": log2fc,
+        "lfcSE": np.abs(np.random.normal(0.2, 0.1, n_genes)),
+        "stat": log2fc / 0.2,
+        "pvalue": pvalues,
+        "padj": padj,
+    })
+    results.index = all_genes
+
+    return results
+
+
 def is_sorted(values, descending: bool = True) -> bool:
     """Check if values are sorted.
 
