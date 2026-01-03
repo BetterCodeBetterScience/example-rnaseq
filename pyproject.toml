@@ -22,6 +22,7 @@ dependencies = [
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
     "python-dotenv>=1.2.1",
+    "radon>=6.0.1",
     "scanpy>=1.11.5",
     "scikit-image>=0.26.0",
     "scikit-misc>=0.5.2",
