@@ -167,8 +167,8 @@ def prepare_enrichr_plot_data(
 
     combined = pd.concat(dfs)
 
-    # Compute -log10(P-value)
-    combined["log_p"] = -np.log10(combined["Adjusted P-value"])
+    # Compute -log10(P-value), adding small epsilon to avoid log(0) = -inf
+    combined["log_p"] = -np.log10(combined["Adjusted P-value"] + 1e-10)
 
     # Extract gene count from Overlap (e.g., "5/200" -> 5)
     combined["Gene_Count"] = combined["Overlap"].apply(lambda x: int(x.split("/")[0]))
