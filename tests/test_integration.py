@@ -180,7 +180,9 @@ class TestPseudobulkPipelineIntegration:
     """Integration tests for pseudobulk pipeline."""
 
     def test_pseudobulk_pipeline_runs(self, adata_for_integration, temp_output_dir):
-        """Test that pseudobulk pipeline runs to completion."""
+        """Test that pseudobulk pipeline runs and produces correct aggregation."""
+        import scipy.sparse as sp
+
         adata = adata_for_integration.copy()
 
         # Ensure required columns exist
@@ -188,6 +190,20 @@ class TestPseudobulkPipelineIntegration:
             adata.obs["development_stage"] = "45-year-old human stage"
         if "sex" not in adata.obs.columns:
             adata.obs["sex"] = "male"
+
+        # Store input counts for verification
+        if "counts" in adata.layers:
+            input_X = adata.layers["counts"]
+        else:
+            input_X = adata.X
+        if sp.issparse(input_X):
+            input_total = input_X.toarray().sum()
+        else:
+            input_total = input_X.sum()
+
+        n_donors = adata.obs["donor_id"].nunique()
+        n_cell_types = adata.obs["cell_type"].nunique()
+        n_input_cells = adata.n_obs
 
         result = run_pseudobulk_pipeline(
             adata,
@@ -198,12 +214,38 @@ class TestPseudobulkPipelineIntegration:
             figure_dir=temp_output_dir,
         )
 
-        # Check outputs
+        # Check basic outputs
         assert result is not None
         assert result.n_obs > 0
         assert "n_cells" in result.obs.columns
         assert "cell_type" in result.obs.columns
         assert "donor_id" in result.obs.columns
+
+        # Verify aggregation actually happened:
+        # 1. Number of pseudobulk samples should be <= donors x cell_types
+        assert result.n_obs <= n_donors * n_cell_types, (
+            f"Pseudobulk samples ({result.n_obs}) should be <= donors x cell_types "
+            f"({n_donors} x {n_cell_types} = {n_donors * n_cell_types})"
+        )
+
+        # 2. Total cell counts should match input
+        assert result.obs["n_cells"].sum() == n_input_cells, (
+            f"Sum of n_cells ({result.obs['n_cells'].sum()}) should equal "
+            f"input cell count ({n_input_cells})"
+        )
+
+        # 3. Total counts should be preserved (sums should match)
+        result_X = result.X
+        if sp.issparse(result_X):
+            result_total = result_X.toarray().sum()
+        else:
+            result_total = result_X.sum()
+        assert abs(result_total - input_total) < 1, (
+            f"Total counts should be preserved: input={input_total}, output={result_total}"
+        )
+
+        # 4. Each pseudobulk sample should have at least 1 cell
+        assert (result.obs["n_cells"] >= 1).all(), "All samples should have n_cells >= 1"
 
 
 @pytest.mark.integration

@@ -223,6 +223,28 @@ def sample_deseq_results() -> pd.DataFrame:
     return results
 
 
+def is_sorted(values, descending: bool = True) -> bool:
+    """Check if values are sorted.
+
+    Parameters
+    ----------
+    values : array-like
+        The values to check for sorting
+    descending : bool
+        If True (default), check for descending order (largest first).
+        If False, check for ascending order (smallest first).
+
+    Returns
+    -------
+    bool
+        True if values are sorted in the specified order
+    """
+    if descending:
+        return all(values[i] >= values[i + 1] for i in range(len(values) - 1))
+    else:
+        return all(values[i] <= values[i + 1] for i in range(len(values) - 1))
+
+
 # Pytest markers for categorizing tests
 def pytest_configure(config):
     """Register custom markers."""

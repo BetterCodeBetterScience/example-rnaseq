@@ -79,10 +79,14 @@ class TestGetFileType:
         """Test parquet file detection."""
         assert get_file_type(Path("test.parquet")) == "parquet"
 
-    def test_pickle_fallback(self):
-        """Test pickle fallback for unknown extensions."""
+    def test_pickle_extension(self):
+        """Test pickle file detection."""
         assert get_file_type(Path("test.pkl")) == "pickle"
-        assert get_file_type(Path("test.unknown")) == "pickle"
+
+    def test_unknown_extension_raises(self):
+        """Test that unknown extensions raise ValueError."""
+        with pytest.raises(ValueError, match="Unknown file extension"):
+            get_file_type(Path("test.unknown"))
 
 
 class TestSaveLoadCheckpoint:

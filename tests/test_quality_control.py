@@ -98,39 +98,54 @@ class TestApplyQcFilters:
     def test_filters_low_gene_cells(self, minimal_adata_with_qc):
         """Test filtering cells with too few genes."""
         adata = minimal_adata_with_qc.copy()
-        # Set a low threshold that will keep most cells but filter some
+        # Use 10th percentile - should keep ~90% of cells
         min_genes = int(adata.obs["n_genes_by_counts"].quantile(0.1))
+        expected_pass = (adata.obs["n_genes_by_counts"] > min_genes).sum()
 
         filtered = apply_qc_filters(adata, min_genes=min_genes, max_genes=10000,
                                      min_counts=0, max_counts=100000, max_hb_pct=100)
 
+        # With 10th percentile threshold, we expect most cells to pass
+        assert filtered.n_obs > 0, (
+            f"Expected non-empty result: {expected_pass} cells should have "
+            f"n_genes > {min_genes}"
+        )
         assert filtered.n_obs <= adata.n_obs
-        if filtered.n_obs > 0:
-            assert filtered.obs["n_genes_by_counts"].min() > min_genes
+        assert filtered.obs["n_genes_by_counts"].min() > min_genes
 
     def test_filters_high_gene_cells(self, minimal_adata_with_qc):
         """Test filtering cells with too many genes (doublets)."""
         adata = minimal_adata_with_qc.copy()
-        # Set a high threshold that will filter top cells
+        # Use 90th percentile - should keep ~90% of cells
         max_genes = int(adata.obs["n_genes_by_counts"].quantile(0.9))
+        expected_pass = (adata.obs["n_genes_by_counts"] < max_genes).sum()
 
         filtered = apply_qc_filters(adata, min_genes=0, max_genes=max_genes,
                                      min_counts=0, max_counts=100000, max_hb_pct=100)
 
-        if filtered.n_obs > 0:
-            assert filtered.obs["n_genes_by_counts"].max() < max_genes
+        # With 90th percentile threshold, we expect most cells to pass
+        assert filtered.n_obs > 0, (
+            f"Expected non-empty result: {expected_pass} cells should have "
+            f"n_genes < {max_genes}"
+        )
+        assert filtered.obs["n_genes_by_counts"].max() < max_genes
 
     def test_filters_high_hb_cells(self, minimal_adata_with_qc):
         """Test filtering cells with high hemoglobin content."""
         adata = minimal_adata_with_qc.copy()
-        # Use a high threshold that will filter top HB cells
+        # Use 90th percentile - should keep ~90% of cells
         max_hb = float(adata.obs["pct_counts_hb"].quantile(0.9))
+        expected_pass = (adata.obs["pct_counts_hb"] < max_hb).sum()
 
         filtered = apply_qc_filters(adata, min_genes=0, max_genes=10000,
                                      min_counts=0, max_counts=100000, max_hb_pct=max_hb)
 
-        if filtered.n_obs > 0:
-            assert filtered.obs["pct_counts_hb"].max() < max_hb
+        # With 90th percentile threshold, we expect most cells to pass
+        assert filtered.n_obs > 0, (
+            f"Expected non-empty result: {expected_pass} cells should have "
+            f"pct_counts_hb < {max_hb}"
+        )
+        assert filtered.obs["pct_counts_hb"].max() < max_hb
 
     def test_returns_copy(self, minimal_adata_with_qc):
         """Test that filtering returns a copy."""

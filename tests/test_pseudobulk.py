@@ -87,16 +87,40 @@ class TestCreatePseudobulk:
         assert pb.obs["n_cells"].sum() == adata_for_pseudobulk.n_obs
 
     def test_includes_metadata(self, adata_for_pseudobulk):
-        """Test that metadata columns are preserved."""
+        """Test that metadata columns are preserved and match source data."""
+        adata = adata_for_pseudobulk
         pb = create_pseudobulk(
-            adata_for_pseudobulk,
+            adata,
             group_col="cell_type",
             donor_col="donor_id",
             metadata_cols=["development_stage", "sex"],
         )
 
+        # Check columns exist
         assert "development_stage" in pb.obs.columns
         assert "sex" in pb.obs.columns
+
+        # Verify metadata values match the source data for each donor
+        for donor_id in pb.obs["donor_id"].unique():
+            # Get expected values from source data
+            source_mask = adata.obs["donor_id"] == donor_id
+            expected_dev_stage = adata.obs.loc[source_mask, "development_stage"].iloc[0]
+            expected_sex = adata.obs.loc[source_mask, "sex"].iloc[0]
+
+            # Get values in pseudobulk for this donor
+            pb_mask = pb.obs["donor_id"] == donor_id
+            pb_dev_stages = pb.obs.loc[pb_mask, "development_stage"]
+            pb_sexes = pb.obs.loc[pb_mask, "sex"]
+
+            # All pseudobulk samples for this donor should have matching metadata
+            assert (pb_dev_stages == expected_dev_stage).all(), (
+                f"Development stage mismatch for donor {donor_id}: "
+                f"expected {expected_dev_stage}, got {pb_dev_stages.unique()}"
+            )
+            assert (pb_sexes == expected_sex).all(), (
+                f"Sex mismatch for donor {donor_id}: "
+                f"expected {expected_sex}, got {pb_sexes.unique()}"
+            )
 
     def test_returns_integer_counts(self, adata_for_pseudobulk):
         """Test that pseudobulk counts are integers."""

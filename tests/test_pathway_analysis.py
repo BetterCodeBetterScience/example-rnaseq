@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from conftest import is_sorted
 from example_rnaseq.pathway_analysis import (
     prepare_gsea_plot_data,
     prepare_ranked_list,
@@ -22,7 +23,7 @@ class TestPrepareRankedList:
 
         # Should be sorted descending
         values = rank_df["stat"].values
-        assert all(values[i] >= values[i + 1] for i in range(len(values) - 1))
+        assert is_sorted(values, descending=True)
 
     def test_drops_na_values(self):
         """Test that NA values are dropped."""

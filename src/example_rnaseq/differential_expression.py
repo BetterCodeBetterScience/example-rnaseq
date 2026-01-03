@@ -12,8 +12,11 @@ from pydeseq2.ds import DeseqStats
 from sklearn.preprocessing import StandardScaler
 
 
-def extract_age_from_development_stage(pb_adata: ad.AnnData) -> ad.AnnData:
-    """Extract numeric age from development_stage column.
+def add_age_from_development_stage(pb_adata: ad.AnnData) -> ad.AnnData:
+    """Add numeric age column extracted from development_stage.
+
+    Parses the development_stage column (e.g., "45-year-old human stage")
+    to extract the numeric age and adds it as a new 'age' column.
 
     Parameters
     ----------
@@ -249,8 +252,8 @@ def run_differential_expression_pipeline(
     if design_factors is None:
         design_factors = ["age_scaled", "sex"]
 
-    # Extract age
-    pb_adata = extract_age_from_development_stage(pb_adata)
+    # Add age column from development_stage
+    pb_adata = add_age_from_development_stage(pb_adata)
 
     # Prepare inputs
     counts_df, metadata = prepare_deseq_inputs(pb_adata, var_to_feature)

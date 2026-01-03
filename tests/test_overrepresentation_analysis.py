@@ -77,13 +77,20 @@ class TestPrepareEnrichrPlotData:
         return MockEnrichr
 
     def test_combines_up_and_down(self, mock_enrichr_result):
-        """Test that up and down results are combined."""
+        """Test that up and down results are combined correctly."""
         enr_up = mock_enrichr_result("up")
         enr_down = mock_enrichr_result("down")
 
         combined = prepare_enrichr_plot_data(enr_up, enr_down, n_top=5)
 
-        assert len(combined) == 10  # 5 from each
+        # Total should be 5 from each direction
+        assert len(combined) == 10
+
+        # Verify correct number of up and down genes
+        n_upregulated = (combined["Direction"] == "Upregulated").sum()
+        n_downregulated = (combined["Direction"] == "Downregulated").sum()
+        assert n_upregulated == 5, f"Expected 5 upregulated, got {n_upregulated}"
+        assert n_downregulated == 5, f"Expected 5 downregulated, got {n_downregulated}"
 
     def test_handles_none_inputs(self, mock_enrichr_result):
         """Test handling when one direction is None."""

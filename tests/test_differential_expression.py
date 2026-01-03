@@ -4,20 +4,21 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from conftest import is_sorted
 from example_rnaseq.differential_expression import (
-    extract_age_from_development_stage,
+    add_age_from_development_stage,
     get_significant_genes,
     prepare_deseq_inputs,
     subset_by_cell_type,
 )
 
 
-class TestExtractAgeFromDevelopmentStage:
-    """Tests for age extraction from development stage."""
+class TestAddAgeFromDevelopmentStage:
+    """Tests for adding age column from development stage."""
 
-    def test_extracts_numeric_age(self, minimal_pseudobulk_adata):
-        """Test that numeric age is extracted."""
-        adata = extract_age_from_development_stage(minimal_pseudobulk_adata.copy())
+    def test_adds_numeric_age(self, minimal_pseudobulk_adata):
+        """Test that numeric age column is added."""
+        adata = add_age_from_development_stage(minimal_pseudobulk_adata.copy())
 
         assert "age" in adata.obs.columns
         assert adata.obs["age"].notna().all()
@@ -27,7 +28,7 @@ class TestExtractAgeFromDevelopmentStage:
         adata = minimal_pseudobulk_adata.copy()
         adata.obs["development_stage"] = "45-year-old human stage"
 
-        adata = extract_age_from_development_stage(adata)
+        adata = add_age_from_development_stage(adata)
 
         assert (adata.obs["age"] == 45).all()
 
@@ -38,7 +39,7 @@ class TestPrepareDeseqInputs:
     def test_returns_counts_and_metadata(self, minimal_pseudobulk_adata):
         """Test that counts and metadata are returned."""
         adata = minimal_pseudobulk_adata.copy()
-        adata = extract_age_from_development_stage(adata)
+        adata = add_age_from_development_stage(adata)
 
         counts_df, metadata = prepare_deseq_inputs(adata)
 
@@ -50,7 +51,7 @@ class TestPrepareDeseqInputs:
     def test_counts_have_correct_shape(self, minimal_pseudobulk_adata):
         """Test counts DataFrame shape."""
         adata = minimal_pseudobulk_adata.copy()
-        adata = extract_age_from_development_stage(adata)
+        adata = add_age_from_development_stage(adata)
 
         counts_df, _ = prepare_deseq_inputs(adata)
 
@@ -60,7 +61,7 @@ class TestPrepareDeseqInputs:
     def test_scales_age(self, minimal_pseudobulk_adata):
         """Test that age is scaled."""
         adata = minimal_pseudobulk_adata.copy()
-        adata = extract_age_from_development_stage(adata)
+        adata = add_age_from_development_stage(adata)
 
         _, metadata = prepare_deseq_inputs(adata)
 
@@ -75,7 +76,7 @@ class TestSubsetByCellType:
     def test_subsets_to_cell_type(self, minimal_pseudobulk_adata):
         """Test that data is subsetted to specified cell type."""
         adata = minimal_pseudobulk_adata.copy()
-        adata = extract_age_from_development_stage(adata)
+        adata = add_age_from_development_stage(adata)
         counts_df, metadata = prepare_deseq_inputs(adata)
 
         cell_type = adata.obs["cell_type"].unique()[0]
@@ -90,7 +91,7 @@ class TestSubsetByCellType:
     def test_maintains_index_consistency(self, minimal_pseudobulk_adata):
         """Test that indices are consistent across outputs."""
         adata = minimal_pseudobulk_adata.copy()
-        adata = extract_age_from_development_stage(adata)
+        adata = add_age_from_development_stage(adata)
         counts_df, metadata = prepare_deseq_inputs(adata)
 
         cell_type = adata.obs["cell_type"].unique()[0]
@@ -129,8 +130,7 @@ class TestGetSignificantGenes:
 
         # Should be sorted descending
         log2fc_values = sig_genes["log2FoldChange"].values
-        assert all(log2fc_values[i] >= log2fc_values[i + 1]
-                   for i in range(len(log2fc_values) - 1))
+        assert is_sorted(log2fc_values, descending=True)
 
     def test_returns_dataframe(self, sample_deseq_results):
         """Test that result is a DataFrame."""
@@ -153,7 +153,7 @@ class TestDeseq2Integration:
         from example_rnaseq.differential_expression import run_deseq2
 
         adata = minimal_pseudobulk_adata.copy()
-        adata = extract_age_from_development_stage(adata)
+        adata = add_age_from_development_stage(adata)
         counts_df, metadata = prepare_deseq_inputs(adata)
 
         # Subset to one cell type

@@ -39,27 +39,70 @@ def adata_with_pca(minimal_adata):
 class TestRunHarmonyIntegration:
     """Tests for Harmony batch correction."""
 
-    def test_runs_without_error(self, adata_with_pca):
-        """Test that Harmony runs without error."""
+    @pytest.fixture
+    def harmonypy_available(self):
+        """Check if harmonypy is available."""
+        try:
+            import harmonypy
+            return True
+        except ImportError:
+            return False
+
+    def test_runs_without_error(self, adata_with_pca, harmonypy_available):
+        """Test that Harmony runs and produces corrected coordinates."""
+        if not harmonypy_available:
+            pytest.skip("harmonypy not installed")
+
+        original_pca = adata_with_pca.obsm["X_pca"].copy()
         adata, use_rep = run_harmony_integration(adata_with_pca.copy())
 
-        # Should return a representation
-        assert use_rep in ["X_pca", "X_pca_harmony"]
+        # When harmony is available, it should return harmony coordinates
+        assert use_rep == "X_pca_harmony"
+        assert "X_pca_harmony" in adata.obsm
 
-    def test_creates_harmony_embedding(self, adata_with_pca):
-        """Test that Harmony creates a new embedding."""
+        # The harmony output should be different from the original PCA
+        # (unless there's only one batch, but test data has multiple donors)
+        harmony_coords = adata.obsm["X_pca_harmony"]
+        assert not np.allclose(harmony_coords, original_pca), (
+            "Harmony output should differ from original PCA"
+        )
+
+    def test_creates_harmony_embedding(self, adata_with_pca, harmonypy_available):
+        """Test that Harmony creates a new embedding with correct shape."""
+        if not harmonypy_available:
+            pytest.skip("harmonypy not installed")
+
         adata, use_rep = run_harmony_integration(adata_with_pca.copy())
 
-        if use_rep == "X_pca_harmony":
-            assert "X_pca_harmony" in adata.obsm
-            assert adata.obsm["X_pca_harmony"].shape[0] == adata.n_obs
+        assert use_rep == "X_pca_harmony"
+        assert "X_pca_harmony" in adata.obsm
+        assert adata.obsm["X_pca_harmony"].shape[0] == adata.n_obs
+        assert adata.obsm["X_pca_harmony"].shape == adata.obsm["X_pca"].shape
 
-    def test_preserves_original_pca(self, adata_with_pca):
-        """Test that original PCA is preserved."""
+    def test_preserves_original_pca(self, adata_with_pca, harmonypy_available):
+        """Test that original PCA is preserved after Harmony."""
+        if not harmonypy_available:
+            pytest.skip("harmonypy not installed")
+
         original_pca = adata_with_pca.obsm["X_pca"].copy()
         adata, _ = run_harmony_integration(adata_with_pca.copy())
 
         np.testing.assert_array_equal(adata.obsm["X_pca"], original_pca)
+
+    def test_fallback_without_harmony(self, adata_with_pca, monkeypatch):
+        """Test that function falls back to PCA when harmony is not available."""
+        # Mock the import to simulate harmonypy not being installed
+        import scanpy.external as sce
+
+        def mock_harmony(*args, **kwargs):
+            raise ImportError("harmonypy not installed")
+
+        monkeypatch.setattr(sce.pp, "harmony_integrate", mock_harmony)
+
+        adata, use_rep = run_harmony_integration(adata_with_pca.copy())
+
+        # Should fall back to X_pca
+        assert use_rep == "X_pca"
 
 
 class TestComputeNeighbors:

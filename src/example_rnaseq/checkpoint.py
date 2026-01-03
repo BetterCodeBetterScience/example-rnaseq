@@ -88,14 +88,24 @@ def get_file_type(filepath: Path) -> str:
     -------
     str
         File type identifier: 'h5ad', 'parquet', or 'pickle'
+
+    Raises
+    ------
+    ValueError
+        If file extension is not recognized
     """
     suffix = filepath.suffix.lower()
     if suffix == ".h5ad":
         return "h5ad"
     elif suffix == ".parquet":
         return "parquet"
-    else:
+    elif suffix == ".pkl":
         return "pickle"
+    else:
+        raise ValueError(
+            f"Unknown file extension '{suffix}' for file '{filepath}'. "
+            f"Supported extensions are: .h5ad, .parquet, .pkl"
+        )
 
 
 def save_checkpoint(data: Any, filepath: Path) -> None:
